@@ -8,6 +8,7 @@ fun printf (output) {
 distro.name = "Fedora";
 distro.version = "40";
 distro.edition = "Workstation";
+distro.box = "box_fedora.png";
 
 # this will need to match the steps in the shell script that rotated the bar
 spinline.steps = 16;
@@ -100,7 +101,7 @@ screen_center.y = H / 2;
 image = [];
 mainimage_z = -5000;
 
-fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY) {
+fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, origSquareX, origSquareY) {
   image[id].source = Image("squares-" + id + ".png");
   # we want to keep the image aspect as it is, so figure out the bigger of the
   # dimensions on screen and scale in proportion
@@ -119,6 +120,23 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY) {
   image[id].sprite.SetOpacity(0);
   image[id].sprite.SetImage(image[id].scaled);
   image[id].sprite.SetPosition(screen_center.x + image[id].scaleMidX, screen_center.y + image[id].scaleMidY, mainimage_z);
+
+  # handle the box inlay image
+  image[id].boxfill_source = Image(distro.box);
+  # size of empty box
+  image[id].boxedge_px = Math.Int(squareEdge * image[id].scale_factor);
+  # size we wish to put in box
+  image[id].boxfill_px = Math.Int(image[id].boxedge_px * 0.9);
+  image[id].boxfill_scaled = image[id].boxfill_source.Scale(image[id].boxfill_px, image[id].boxfill_px);
+  # place the box in the center of the empty space.
+  image[id].boxspace_centerX = Math.Int(screen_center.x + image[id].scaleMidX + (origSquareX * image[id].scale_factor) + (image[id].boxedge_px / 2));
+  image[id].boxspace_centerY = Math.Int(screen_center.y + image[id].scaleMidY + (origSquareY * image[id].scale_factor) + (image[id].boxedge_px / 2));
+  image[id].boxfill_X = image[id].boxspace_centerX - (image[id].boxfill_px / 2);
+  image[id].boxfill_Y = image[id].boxspace_centerY - (image[id].boxfill_px / 2);
+  image[id].boxfill_sprite = Sprite();
+  image[id].boxfill_sprite.SetOpacity(0);
+  image[id].boxfill_sprite.SetImage(image[id].boxfill_scaled);
+  image[id].boxfill_sprite.SetPosition(image[id].boxfill_X, image[id].boxfill_Y, mainimage_z + 1);
 
   # oh boy. now to make plymouth draw pretty *text*
   # we want to left-align all the text, so we're gonna order the sprites
@@ -176,14 +194,17 @@ fun image_reveal (id, opacity) {
   image[id].version_sprite.SetOpacity(opacity);
   image[id].distro_sprite.SetOpacity(opacity);
   image[id].edition_sprite.SetOpacity(opacity);
+  image[id].boxfill_sprite.SetOpacity(opacity);
 }
 
 # the first two args are scale factors from the source image
 # the next two args are positioning in the source image relative to the
 # screen center.
 # all the numbers around this and the function are *kinda right* don't be picky.
-image_sprite("pro", 3.0622, 2.448979, -54, -146);
-image_sprite("srv", 2.75862, 2.448979, -123, -165);
+# the fifth argument here is the size of the side of a square inside the nest...
+# and the two args after that are the x/y of where that square begins.
+image_sprite("pro", 3.0622, 2.448979, -54, -146, 145, 20, 13);
+image_sprite("srv", 2.75862, 2.448979, -123, -165, 131, 55, 18);
 
 # MAIN SCREEN TURN ON
 image_reveal("pro", 1);
