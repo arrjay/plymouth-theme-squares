@@ -1,7 +1,7 @@
 # this is just a handy global while fucking with the screen drawers
 debug = Sprite();
 fun printf (output) {
-  debug.SetImage(Image.Text(output, 0.5, 0.5, 0.5));
+  debug.SetImage(Image.Text(output, 0.5, 0.5, 0.5, 1));
 }
 
 # distro info block
@@ -83,7 +83,7 @@ fun progbar_Advance (progress) {
 }
 
 # draw some text below the progress bar so it doesn't look really off. (it's really off.)
-starting_up.source = Image.Text("Starting up...", 0, 0, 0, "Libre Franklin Thin");
+starting_up.source = Image.Text("Starting up...", 0, 0, 0, 1, "Libre Franklin Light");
 # proportinally scale the font to the height of bottom_step
 starting_up.scale_factor = starting_up.source.GetHeight() / bottom_step;
 starting_up.scaled = starting_up.source.Scale(starting_up.source.GetWidth()  * starting_up.scale_factor,
@@ -121,11 +121,61 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY) {
   image[id].sprite.SetPosition(screen_center.x + image[id].scaleMidX, screen_center.y + image[id].scaleMidY, mainimage_z);
 
   # oh boy. now to make plymouth draw pretty *text*
+  # we want to left-align all the text, so we're gonna order the sprites
+  # in that direction
+  # we're gonna rely more on the height to sort out text scaling...
+  image[id].text_scale_target = Math.Int(H / 9);
+  image[id].text_target_size = 64;
+  # now, for positioning we want to hang off the _bottom_ of our image a bit.
+  image[id].text_anchor_x = screen_center.x + image[id].scaleSizeX / 2 + (image[id].text_target_size * 2.5);
+  image[id].text_anchor_y = screen_center.y + image[id].scaleMidY + image[id].scaleSizeY + image[id].text_target_size * 0.2;
+
+  # we put the space with the version number so it's condensed to shit
+  image[id].version_text = Image.Text(" " + distro.version, 0, 0, 0, 1, "Libre Franklin Regular 80");
+  # fuck with the X scale to compress the version number (emulate narrow font?)
+  image[id].version_scaleX = Math.Int(image[id].version_text.GetHeight() / image[id].text_target_size * image[id].text_scale_target * 0.5);
+  image[id].version_scaleY = Math.Int(image[id].text_scale_target);
+  image[id].version_scaled = image[id].version_text.Scale(image[id].version_scaleX, image[id].version_scaleY);
+  image[id].version_sprite = Sprite();
+  image[id].version_sprite.SetOpacity(0);
+  image[id].version_sprite.SetImage(image[id].version_scaled);
+  image[id].version_sprite.SetPosition(image[id].text_anchor_x - image[id].version_scaleX,
+                                       image[id].text_anchor_y,
+                                       mainimage_z);
+
+  image[id].distro_text = Image.Text(distro.name, 0, 0, 0, 1, "Libre Franklin Black 100");
+  # we're not trying to condense the distro name, notably.
+  image[id].distro_scaleX = Math.Int(image[id].distro_text.GetHeight() / image[id].text_target_size * image[id].text_scale_target);
+  # in fact we made it bigger
+  image[id].distro_scaleY = Math.Int(image[id].text_scale_target * 1.2);
+  image[id].distro_scaled = image[id].distro_text.Scale(image[id].distro_scaleX, image[id].distro_scaleY);
+  image[id].distro_sprite = Sprite();
+  image[id].distro_sprite.SetOpacity(0);
+  image[id].distro_sprite.SetImage(image[id].distro_scaled);
+  image[id].distro_sprite.SetPosition(image[id].text_anchor_x - image[id].version_scaleX - image[id].distro_scaleX,
+                                      # align with the distro_version sprite...?
+                                      image[id].text_anchor_y + (image[id].version_scaleY + 2) - image[id].distro_scaleY,
+                                      mainimage_z);
+
+  image[id].edition_text = Image.Text(distro.edition, 0, 0, 0, 1, "Libre Franklin Black 90");
+  image[id].edition_scaleX = Math.Int(image[id].edition_text.GetHeight() / image[id].text_target_size * image[id].text_scale_target);
+  # scrungle
+  image[id].edition_scaleY = Math.Int(image[id].text_scale_target * 0.5);
+  image[id].edition_scaled = image[id].edition_text.Scale(image[id].edition_scaleX, image[id].edition_scaleY);
+  image[id].edition_sprite = Sprite();
+  image[id].edition_sprite.SetOpacity(0);
+  image[id].edition_sprite.SetImage(image[id].edition_scaled);
+  image[id].edition_sprite.SetPosition(image[id].text_anchor_x - image[id].edition_scaleX,
+                                       image[id].text_anchor_y + image[id].distro_scaleY - image[id].edition_scaleY + 2,
+                                       mainimage_z);
 }
 
 # enable a logo and associated text
 fun image_reveal (id, opacity) {
   image[id].sprite.SetOpacity(opacity);
+  image[id].version_sprite.SetOpacity(opacity);
+  image[id].distro_sprite.SetOpacity(opacity);
+  image[id].edition_sprite.SetOpacity(opacity);
 }
 
 # the first two args are scale factors from the source image
