@@ -4,6 +4,9 @@ fun printf (output) {
   debug.SetImage(Image.Text(output, 0.5, 0.5, 0.5, 1));
 }
 
+# used for drawing alternate mode up (or, you know, not)
+status = "normal";
+
 # distro info block
 distro.name = "Fedora";
 distro.version = "40";
@@ -12,6 +15,8 @@ distro.box = "box_fedora.png";
 
 # this will need to match the steps in the shell script that rotated the bar
 spinline.steps = 16;
+# used for determining which set of squares to show on main and alternate screens.
+style = "pro";
 spinline.source = "spinner-srv"; # change this to spinner-pro if you like
 
 # start with two colors (from 1x1 pngs)
@@ -222,7 +227,7 @@ image_sprite("pro", 3.0622, 2.448979, -54, -146, 145, 20, 13);
 image_sprite("srv", 2.75862, 2.448979, -123, -165, 131, 55, 18);
 
 # MAIN SCREEN TURN ON
-image_reveal("pro", 1);
+image_reveal(style, 1);
 
 # hook the boot progress callback to update the spinner, progress bar
 fun progress_callback (time, prog) {
@@ -233,7 +238,14 @@ Plymouth.SetBootProgressFunction(progress_callback);
 
 #----------------------------------------- Dialog --------------------------------
 
-status = "normal";
+# we call on the dialog we haven't made yet (to turn it off) for normal callbacks.
+fun display_normal_callback () {
+  global.status = "normal";
+  if (global.dialog) {
+    dialog_opacity (0);
+  }
+}
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
 
 fun dialog_setup() {
   local.box;
@@ -283,12 +295,6 @@ fun dialog_opacity(opacity) {
   }
 }
 
-fun display_normal_callback () {
-  global.status = "normal";
-  if (global.dialog) {
-    dialog_opacity (0);
-  }
-}
 
 fun display_password_callback (prompt, bullets) {
   global.status = "password";
@@ -312,11 +318,9 @@ fun display_password_callback (prompt, bullets) {
   }
 }
 
-Plymouth.SetDisplayNormalFunction(display_normal_callback);
 Plymouth.SetDisplayPasswordFunction(display_password_callback);
 
 #----------------------------------------- Quit --------------------------------
 
 fun quit_callback () {}
-
 Plymouth.SetQuitFunction(quit_callback);
