@@ -1,3 +1,14 @@
+# this is just a handy global while fucking with the screen drawers
+debug = Sprite();
+fun printf (output) {
+  debug.SetImage(Image.Text(output, 0.5, 0.5, 0.5));
+}
+
+# distro info block
+distro.name = "Fedora";
+distro.version = "40";
+distro.edition = "Workstation";
+
 # this will need to match the steps in the shell script that rotated the bar
 spinline.steps = 16;
 spinline.source = "spinner-srv"; # change this to spinner-pro if you like
@@ -18,7 +29,7 @@ bottom_size = H - spinline.center;
 bottom = Sprite(gray.Scale(W, bottom_size));
 bottom.SetX(0);
 bottom.SetY(spinline.center);
-bottom.SetZ(-9999);
+bottom.SetZ(-6000);
 
 # paint upper window.
 top = Sprite(white.Scale(W, spinline.center));
@@ -71,12 +82,23 @@ fun progbar_Advance (progress) {
   progress_bar.sprite.SetImage(progress_bar.scaled.Crop(0, 0, progress_bar.scaleX * progress, progress_bar.scaleY));
 }
 
+# draw some text below the progress bar so it doesn't look really off. (it's really off.)
+starting_up.source = Image.Text("Starting up...", 0, 0, 0, "Libre Franklin Thin");
+# proportinally scale the font to the height of bottom_step
+starting_up.scale_factor = starting_up.source.GetHeight() / bottom_step;
+starting_up.scaled = starting_up.source.Scale(starting_up.source.GetWidth()  * starting_up.scale_factor,
+                                              starting_up.source.GetHeight() * starting_up.scale_factor);
+starting_up.posX = (W / 2) - (starting_up.scaled.GetWidth() / 2);
+starting_up.posY = (spinline.center + bottom_step * 3);
+starting_up.sprite = Sprite(starting_up.scaled);
+starting_up.sprite.SetPosition(starting_up.posX, starting_up.posY, statbars_z);
+
 # main images...
 screen_ratio = H / W;
 screen_center.x = W / 2;
 screen_center.y = H / 2;
-debug = Sprite();
 image = [];
+mainimage_z = -5000;
 
 fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY) {
   image[id].source = Image("squares-" + id + ".png");
@@ -94,9 +116,16 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY) {
   image[id].scaleSizeY = Math.Int(image[id].scale_factor * image[id].source.GetHeight());
   image[id].scaled = image[id].source.Scale(image[id].scaleSizeX, image[id].scaleSizeY);
   image[id].sprite = Sprite();
-  image[id].sprite.SetOpacity = 0;
+  image[id].sprite.SetOpacity(0);
   image[id].sprite.SetImage(image[id].scaled);
-  image[id].sprite.SetPosition(screen_center.x + image[id].scaleMidX, screen_center.y + image[id].scaleMidY);
+  image[id].sprite.SetPosition(screen_center.x + image[id].scaleMidX, screen_center.y + image[id].scaleMidY, mainimage_z);
+
+  # oh boy. now to make plymouth draw pretty *text*
+}
+
+# enable a logo and associated text
+fun image_reveal (id, opacity) {
+  image[id].sprite.SetOpacity(opacity);
 }
 
 # the first two args are scale factors from the source image
@@ -105,6 +134,9 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY) {
 # all the numbers around this and the function are *kinda right* don't be picky.
 image_sprite("pro", 3.0622, 2.448979, -54, -146);
 image_sprite("srv", 2.75862, 2.448979, -123, -165);
+
+# MAIN SCREEN TURN ON
+image_reveal("pro", 1);
 
 # hook the boot progress callback to update the spinner, progress bar
 fun progress_callback (time, prog) {
