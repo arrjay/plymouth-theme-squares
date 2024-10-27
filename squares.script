@@ -83,16 +83,31 @@ fun progbar_Advance (progress) {
   progress_bar.sprite.SetImage(progress_bar.scaled.Crop(0, 0, progress_bar.scaleX * progress, progress_bar.scaleY));
 }
 
-# draw some text below the progress bar so it doesn't look really off. (it's really off.)
-starting_up.source = Image.Text("Starting up...", 0, 0, 0, 1, "Libre Franklin Light");
-# proportinally scale the font to the height of bottom_step
-starting_up.scale_factor = starting_up.source.GetHeight() / bottom_step;
-starting_up.scaled = starting_up.source.Scale(starting_up.source.GetWidth()  * starting_up.scale_factor,
-                                              starting_up.source.GetHeight() * starting_up.scale_factor);
-starting_up.posX = (W / 2) - (starting_up.scaled.GetWidth() / 2);
-starting_up.posY = (spinline.center + bottom_step * 3);
-starting_up.sprite = Sprite(starting_up.scaled);
-starting_up.sprite.SetPosition(starting_up.posX, starting_up.posY, statbars_z);
+#----------------------------------------- Message --------------------------------
+message_sprite = Sprite();
+
+fun message (text) {
+  source = Image.Text(text, 0, 0, 0, 1, "Libre Franklin Light");
+  # proportinally scale the font to the height of bottom_step
+  scalef = source.GetHeight() / bottom_step;
+  scaled = source.Scale(source.GetWidth() * scalef, source.GetHeight() * scalef);
+  message_sprite.SetOpacity(0);
+  message_sprite.SetImage(scaled);
+  # position below the progress bar so it doesn't look really off. (it's really off.)
+  message_sprite.SetPosition((W / 2) - (scaled.GetWidth() / 2), spinline.center + bottom_step * 3);
+  message_sprite.SetOpacity(1);
+}
+
+# we should do something smarter, to hide the *previous* text, but...sounds hard.
+fun starting (text) {
+  message("Starting up...");
+}
+
+# we handle messages by replacing the startup text.
+starting("up");
+
+Plymouth.SetMessageFunction(message);
+Plymouth.SetHideMessageFunction(starting);
 
 # main images...
 screen_ratio = H / W;
@@ -305,16 +320,3 @@ Plymouth.SetDisplayPasswordFunction(display_password_callback);
 fun quit_callback () {}
 
 Plymouth.SetQuitFunction(quit_callback);
-
-#----------------------------------------- Message --------------------------------
-
-message_sprite = Sprite();
-message_sprite.SetPosition(10, 10, 10000);
-
-fun message_callback (text)
-{
-  my_image = Image.Text(text, 1, 1, 1);
-  message_sprite.SetImage(my_image);
-}
-
-Plymouth.SetMessageFunction(message_callback);
