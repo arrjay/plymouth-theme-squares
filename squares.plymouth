@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Squares
+Description=OS Squares...yeah
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/squares
+ScriptFile=/usr/share/plymouth/themes/squares/squares.script

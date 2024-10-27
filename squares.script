@@ -1,0 +1,217 @@
+# this will need to match the steps in the shell script that rotated the bar
+spinline.steps = 16;
+spinline.source = "spinner-srv"; # change this to spinner-pro if you like
+
+# start with two colors (from 1x1 pngs)
+white = Image("white.png");
+gray = Image("gray.png");
+
+# assuming a 640x480 screen, 60 should be the spinner centerline, so let's do some math.
+# 30 is the largest common denominator there, so.
+# that gets us 16 segments, and the bottom piece takes two.
+H = Window.GetHeight();
+W = Window.GetWidth();
+spinline.center = H - ((H / 16) * 2);
+
+# paint lower window.
+bottom_size = H - spinline.center;
+bottom = Sprite(gray.Scale(W, bottom_size));
+bottom.SetX(0);
+bottom.SetY(spinline.center);
+bottom.SetZ(-9999);
+
+# paint upper window.
+top = Sprite(white.Scale(W, spinline.center));
+top.SetX(0);
+top.SetY(0);
+top.SetZ(-10000);
+
+# paint initial spinner
+statbars_z = -900;
+# scaling off 480 pixels high again
+spinline.scale = H / 48;
+for (i = 0 ; i < spinline.steps ; i++) {
+  spinline.image[i] = Image(spinline.source + i + ".png").Scale(W, spinline.scale);
+}
+spinline.sprite = Sprite();
+spinline.sprite.SetX(0);
+spinline.sprite.SetY(spinline.center - (spinline.scale / 2));
+spinline.sprite.SetZ(statbars_z);
+spinline.sprite.SetImage(spinline.image[0]);
+
+# animate the spinner
+fun spinline_Animate (time) {
+ spinline.sprite.SetImage(spinline.image[Math.Int(time * 2 % spinline.steps)]);
+}
+
+# paint boot progress
+progress_box.image = Image("progress-box.png");
+# divide lower area
+bottom_step = Math.Int(bottom_size / 6);
+# determine independent X/Y scaling to *deal* with protrait displays.
+progress_box.scaleX = Math.Int(W / 3.939393);
+progress_box.scaleY = Math.Int(bottom_step);
+progress_box.sprite = Sprite(progress_box.image.Scale(progress_box.scaleX, progress_box.scaleY));
+progress_box.posX = (W / 2) - (progress_box.scaleX / 2);
+progress_box.posY = (spinline.center + bottom_step * 1.5);
+progress_box.sprite.SetPosition(progress_box.posX, progress_box.posY, statbars_z);
+
+# draw the progress bar *inside* the box
+progress_bar.source = Image("progress-bar.png");
+progress_bar.scaleX = progress_box.scaleX - 2;
+progress_bar.scaleY = progress_box.scaleY - 4;
+progress_bar.scaled = progress_bar.source.Scale(progress_bar.scaleX, progress_bar.scaleY);
+progress_bar.sprite = Sprite();
+progress_bar.posX = (progress_box.posX + 2);
+progress_bar.posY = (progress_box.posY + 2);
+progress_bar.sprite.SetPosition(progress_bar.posX, progress_bar.posY, statbars_z + 10);
+
+# draw the progress bar by uncropping it
+fun progbar_Advance (progress) {
+  progress_bar.sprite.SetImage(progress_bar.scaled.Crop(0, 0, progress_bar.scaleX * progress, progress_bar.scaleY));
+}
+
+# main images...
+screen_ratio = H / W;
+screen_center.x = W / 2;
+screen_center.y = H / 2;
+debug = Sprite();
+image = [];
+
+fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY) {
+  image[id].source = Image("squares-" + id + ".png");
+  # we want to keep the image aspect as it is, so figure out the bigger of the
+  # dimensions on screen and scale in proportion
+  image[id].ratio = image[id].source.GetHeight() / image[id].source.GetWidth();
+  if (screen_ratio > image[id].ratio) {
+    image[id].scale_factor = origScaleX * image[id].ratio * 0.9;
+  } else {
+    image[id].scale_factor = origScaleY * image[id].ratio * 0.9;
+  }
+  image[id].scaleMidX = Math.Int(image[id].scale_factor * origMidX);
+  image[id].scaleMidY = Math.Int(image[id].scale_factor * origMidY);
+  image[id].scaleSizeX = Math.Int(image[id].scale_factor * image[id].source.GetWidth());
+  image[id].scaleSizeY = Math.Int(image[id].scale_factor * image[id].source.GetHeight());
+  image[id].scaled = image[id].source.Scale(image[id].scaleSizeX, image[id].scaleSizeY);
+  image[id].sprite = Sprite();
+  image[id].sprite.SetOpacity = 0;
+  image[id].sprite.SetImage(image[id].scaled);
+  image[id].sprite.SetPosition(screen_center.x + image[id].scaleMidX, screen_center.y + image[id].scaleMidY);
+}
+
+# the first two args are scale factors from the source image
+# the next two args are positioning in the source image relative to the
+# screen center.
+# all the numbers around this and the function are *kinda right* don't be picky.
+image_sprite("pro", 3.0622, 2.448979, -54, -146);
+image_sprite("srv", 2.75862, 2.448979, -123, -165);
+
+# hook the boot progress callback to update the spinner, progress bar
+fun progress_callback (time, prog) {
+  spinline_Animate(time);
+  progbar_Advance(prog);
+}
+Plymouth.SetBootProgressFunction(progress_callback);
+
+#----------------------------------------- Dialog --------------------------------
+
+status = "normal";
+
+fun dialog_setup() {
+  local.box;
+  local.lock;
+  local.entry;
+ 
+  box.image = Image("box.png");
+  lock.image = Image("lock.png");
+  entry.image = Image("entry.png");
+ 
+  box.sprite = Sprite(box.image);
+  box.x = Window.GetWidth()  / 2 - box.image.GetWidth ()/2;
+  box.y = Window.GetHeight() / 4 - box.image.GetHeight()/4;
+  box.z = 10000;
+  box.sprite.SetPosition(box.x, box.y, box.z);
+    
+  # scale the lock with the box height
+  lock.scale_factor = box.image.GetHeight() / lock.image.GetHeight() * 0.75;
+  lock.scaled = lock.image.Scale(lock.image.GetWidth()  * lock.scale_factor,
+                                 lock.image.GetHeight() * lock.scale_factor);
+  lock.sprite = Sprite(lock.scaled);
+  
+  lock.x = box.x + box.image.GetWidth()/2 - (lock.scaled.GetWidth() + entry.image.GetWidth()) / 2;
+  lock.y = box.y + box.image.GetHeight()/2 - lock.scaled.GetHeight()/2;
+  lock.z = box.z + 1;
+  lock.sprite.SetPosition(lock.x, lock.y, lock.z);
+    
+  entry.sprite = Sprite(entry.image);
+  entry.x = lock.x + lock.scaled.GetWidth();
+  entry.y = box.y + box.image.GetHeight()/2 - entry.image.GetHeight()/2;
+  entry.z = box.z + 1;
+  entry.sprite.SetPosition(entry.x, entry.y, entry.z);
+    
+  global.dialog.box = box;
+  global.dialog.lock = lock;
+  global.dialog.entry = entry;
+  global.dialog.bullet_image = Image("bullet.png");
+  dialog_opacity (1);
+}
+    
+fun dialog_opacity(opacity) {
+  dialog.box.sprite.SetOpacity (opacity);
+  dialog.lock.sprite.SetOpacity (opacity);
+  dialog.entry.sprite.SetOpacity (opacity);
+  for (index = 0; dialog.bullet[index]; index++) {
+    dialog.bullet[index].sprite.SetOpacity(opacity);
+  }
+}
+
+fun display_normal_callback () {
+  global.status = "normal";
+  if (global.dialog) {
+    dialog_opacity (0);
+  }
+}
+
+fun display_password_callback (prompt, bullets) {
+  global.status = "password";
+  if (!global.dialog)
+  dialog_setup();
+  else
+  dialog_opacity(1);
+  for (index = 0; dialog.bullet[index] || index < bullets; index++) {
+    if (!dialog.bullet[index]) {
+      dialog.bullet[index].sprite = Sprite(dialog.bullet_image);
+      dialog.bullet[index].x = dialog.entry.x + index * dialog.bullet_image.GetWidth();
+      dialog.bullet[index].y = dialog.entry.y + dialog.entry.image.GetHeight() / 2 - dialog.bullet_image.GetHeight() / 2;
+      dialog.bullet[index].z = dialog.entry.z + 1;
+      dialog.bullet[index].sprite.SetPosition(dialog.bullet[index].x, dialog.bullet[index].y, dialog.bullet[index].z);
+    }
+    if (index < bullets) {
+      dialog.bullet[index].sprite.SetOpacity(1);
+    } else {
+      dialog.bullet[index].sprite.SetOpacity(0);
+    }
+  }
+}
+
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+#----------------------------------------- Quit --------------------------------
+
+fun quit_callback () {}
+
+Plymouth.SetQuitFunction(quit_callback);
+
+#----------------------------------------- Message --------------------------------
+
+message_sprite = Sprite();
+message_sprite.SetPosition(10, 10, 10000);
+
+fun message_callback (text)
+{
+  my_image = Image.Text(text, 1, 1, 1);
+  message_sprite.SetImage(my_image);
+}
+
+Plymouth.SetMessageFunction(message_callback);
