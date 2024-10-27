@@ -29,6 +29,7 @@ gray = Image("gray.png");
 H = Window.GetHeight();
 W = Window.GetWidth();
 spinline.center = H - ((H / 16) * 2);
+spinline.alt = H - ((H/4) * 3);
 
 # paint lower window.
 bottom_size = H - spinline.center;
@@ -51,10 +52,17 @@ for (i = 0 ; i < spinline.steps ; i++) {
   spinline.image[i] = Image(spinline.source + i + ".png").Scale(W, spinline.scale);
 }
 spinline.sprite = Sprite();
-spinline.sprite.SetX(0);
-spinline.sprite.SetY(spinline.center - (spinline.scale / 2));
-spinline.sprite.SetZ(statbars_z);
+spinline.sprite.SetOpacity(0);
 spinline.sprite.SetImage(spinline.image[0]);
+spinline.sprite.SetPosition(0, 0 - spinline.scale, statbars_z);
+
+# move the spinner
+fun spinline_Move(pos) {
+  spinline.sprite.SetOpacity(0);
+  spinline.sprite.SetY(pos - (spinline.scale / 2));
+  spinline.sprite.SetOpacity(1);
+}
+spinline_Move(spinline.center);
 
 # animate the spinner
 fun spinline_Animate (time) {
@@ -215,6 +223,12 @@ fun image_reveal (id, opacity) {
   image[id].distro_sprite.SetOpacity(opacity);
   image[id].edition_sprite.SetOpacity(opacity);
   image[id].boxfill_sprite.SetOpacity(opacity);
+}
+
+# something that sorks as the alternate rendering (for verbose/status boots)
+alt_images = [];
+altimage_z = -4000;
+fun image_altsprite(id) {
 }
 
 # the first two args are scale factors from the source image
