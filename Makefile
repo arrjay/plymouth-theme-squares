@@ -54,12 +54,21 @@ darkorangebox.png:
 		darkorangebox.png
 
 lightorangebox.png:
-	magick -size ${BOXTARGET}x${BOXTARGET} \
+	magick \
+		-size ${BOXTARGET}x${BOXTARGET} \
 		canvas:${ORANGE_MID} \
 		\( \
 			-size ${BOXTARGET}x${BOXTARGET} \
-			-define gradient:radii=${THIRTEENSIXTEENTHSBOX},${THIRTEENSIXTEENTHSBOX} \
+			-define gradient:radii=${SEVENEIGHTHSBOX},${SEVENEIGHTHSBOX} \
 			-define gradient:center=0,0 \
+			radial-gradient:black-white \
+		\) -channel-fx '|gray=>alpha' \
+		-compose Over \
+		-layers merge \
+		\( \
+			-size ${BOXTARGET}x${BOXTARGET} \
+			-define gradient:radii=${QUARTERBOX},${QUARTERBOX} \
+			-define gradient:center=${BOXTARGET},${THIRDBOX} \
 			radial-gradient:black-white \
 		\) -channel-fx '|gray=>alpha' \
 		-compose Over \
