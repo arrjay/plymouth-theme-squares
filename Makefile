@@ -6,8 +6,11 @@ ORANGE_LIGHT := \#efbe6a
 BOXTARGET := 256
 
 QUARTERBOX := $(shell echo "${BOXTARGET}*0.25" | bc)
+THIRDBOX := $(shell echo "${BOXTARGET}/3" | bc)
 HALFBOX := $(shell echo "${BOXTARGET}*0.5" | bc)
+TWOTHIRDBOX := $(shell echo "${BOXTARGET}-${THIRDBOX}" | bc)
 THREEQUARTERBOX := $(shell echo "${BOXTARGET}*0.75" | bc)
+THIRTEENSIXTEENTHSBOX := $(shell echo "${BOXTARGET}*0.8125" | bc)
 SEVENEIGHTHSBOX := $(shell echo "${BOXTARGET}*0.875" | bc)
 
 # calculate border width
@@ -53,4 +56,12 @@ darkorangebox.png:
 lightorangebox.png:
 	magick -size ${BOXTARGET}x${BOXTARGET} \
 		canvas:${ORANGE_MID} \
+		\( \
+			-size ${BOXTARGET}x${BOXTARGET} \
+			-define gradient:radii=${THIRTEENSIXTEENTHSBOX},${THIRTEENSIXTEENTHSBOX} \
+			-define gradient:center=0,0 \
+			radial-gradient:black-white \
+		\) -channel-fx '|gray=>alpha' \
+		-compose Over \
+		-layers merge \
 		lightorangebox.png
