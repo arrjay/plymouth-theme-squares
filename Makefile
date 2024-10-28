@@ -20,6 +20,10 @@ DARKORANGE_WIDTH := $(shell echo "${BOXTARGET}/31" | bc)
 DARKORANGE_X := 0,0
 DARKORANGE_Y := $(shell echo "${BOXTARGET}-${DARKORANGE_WIDTH}" | bc)
 
+LIGHTORANGE_WIDTH := $(shell echo "${BOXTARGET}/13.2307" | bc)
+LIGHTORANGE_X := ${LIGHTORANGE_WIDTH}
+LIGHTORANGE_Y := $(shell echo "${BOXTARGET}-${LIGHTORANGE_WIDTH}" | bc)
+
 white.png:
 	magick -size 1x1 canvas:#ffffff white.png
 
@@ -59,8 +63,8 @@ lightorangebox.png:
 		canvas:${ORANGE_MID} \
 		\( \
 			-size ${BOXTARGET}x${BOXTARGET} \
-			-define gradient:radii=${SEVENEIGHTHSBOX},${SEVENEIGHTHSBOX} \
-			-define gradient:center=0,0 \
+			-define gradient:radii=${BOXTARGET},${BOXTARGET} \
+			-define gradient:center=${LIGHTORANGE_X},${LIGHTORANGE_X} \
 			radial-gradient:black-white \
 		\) -channel-fx '|gray=>alpha' \
 		-compose Over \
@@ -68,9 +72,10 @@ lightorangebox.png:
 		\( \
 			-size ${BOXTARGET}x${BOXTARGET} \
 			-define gradient:radii=${QUARTERBOX},${QUARTERBOX} \
-			-define gradient:center=${BOXTARGET},${THIRDBOX} \
+			-define gradient:center=${LIGHTORANGE_Y},${THIRDBOX} \
 			radial-gradient:black-white \
 		\) -channel-fx '|gray=>alpha' \
 		-compose Over \
 		-layers merge \
+		\( +clone -threshold 9 -draw "rectangle ${LIGHTORANGE_X},${LIGHTORANGE_X} ${LIGHTORANGE_Y},${LIGHTORANGE_Y}" \) -channel-fx '|gray=>alpha' \
 		lightorangebox.png
