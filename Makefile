@@ -61,20 +61,24 @@ darkorangebox.png:
 
 # we currently do this very kludgey thing because IM wants you to stack masks and I just
 lightorangebox.png:
-	magick \
+	magick -size ${BOXTARGET}x${BOXTARGET} \
+		canvas:${ORANGE_MID} \
 		\( \
-			-size ${BOXTARGET}x${BOXTARGET} \
-			-define gradient:radii=${BOXTARGET},${BOXTARGET} \
-			-define gradient:center=${LIGHTORANGE_X},${LIGHTORANGE_X} \
-			radial-gradient:black-${ORANGE_MID} \
+			\( \
+				-size ${BOXTARGET}x${BOXTARGET} \
+				-define gradient:radii=${BOXTARGET},${BOXTARGET} \
+				-define gradient:center=${LIGHTORANGE_X},${LIGHTORANGE_X} \
+				radial-gradient:black-white \
+			\) \
+			\( \
+				-size ${BOXTARGET}x${BOXTARGET} \
+				-define gradient:radii=${QUARTERBOX},${QUARTERBOX} \
+				-define gradient:center=${LIGHTORANGE_Y},${THIRDBOX} \
+				radial-gradient:black-white \
+			\) \
+			-compose Darken -composite \
+			-fill black -draw "rectangle ${LIGHTORANGE_X},${LIGHTORANGE_X} ${LIGHTORANGE_Y},${LIGHTORANGE_Y}" \
+			-channel-fx '|gray=>alpha' \
 		\) \
-		\( \
-			-size ${BOXTARGET}x${BOXTARGET} \
-			-define gradient:radii=${QUARTERBOX},${QUARTERBOX} \
-			-define gradient:center=${LIGHTORANGE_Y},${THIRDBOX} \
-			radial-gradient:black-${ORANGE_MID} \
-		\) \
-		-compose Darken -composite -channel-fx '|gray=>alpha' \
-		-fill \\${BLUE} -draw "rectangle ${LIGHTORANGE_X},${LIGHTORANGE_X} ${LIGHTORANGE_Y},${LIGHTORANGE_Y}" \
-		-fill none -draw "color ${HALFBOX},${HALFBOX} replace" \
+		-compose copy-opacity -composite \
 		lightorangebox.png
