@@ -2,6 +2,8 @@ ORANGE_DARK := \#d73b00
 ORANGE_MID := \#d85e00
 ORANGE_LIGHT := \#efbe6a
 
+BLUE := \#0000ff
+
 # pixels
 BOXTARGET := 256
 
@@ -57,25 +59,22 @@ darkorangebox.png:
 		\( +clone -threshold 9 -draw "rectangle 0,0 ${DARKORANGE_Y},${DARKORANGE_Y}" \) -channel-fx '|gray=>alpha' \
 		darkorangebox.png
 
+# we currently do this very kludgey thing because IM wants you to stack masks and I just
 lightorangebox.png:
 	magick \
-		-size ${BOXTARGET}x${BOXTARGET} \
-		canvas:${ORANGE_MID} \
 		\( \
 			-size ${BOXTARGET}x${BOXTARGET} \
 			-define gradient:radii=${BOXTARGET},${BOXTARGET} \
 			-define gradient:center=${LIGHTORANGE_X},${LIGHTORANGE_X} \
-			radial-gradient:black-white \
-		\) -channel-fx '|gray=>alpha' \
-		-compose Over \
-		-layers merge \
+			radial-gradient:black-${ORANGE_MID} \
+		\) \
 		\( \
 			-size ${BOXTARGET}x${BOXTARGET} \
 			-define gradient:radii=${QUARTERBOX},${QUARTERBOX} \
 			-define gradient:center=${LIGHTORANGE_Y},${THIRDBOX} \
-			radial-gradient:black-white \
-		\) -channel-fx '|gray=>alpha' \
-		-compose Over \
-		-layers merge \
-		\( +clone -threshold 9 -draw "rectangle ${LIGHTORANGE_X},${LIGHTORANGE_X} ${LIGHTORANGE_Y},${LIGHTORANGE_Y}" \) -channel-fx '|gray=>alpha' \
+			radial-gradient:black-${ORANGE_MID} \
+		\) \
+		-compose Darken -composite -channel-fx '|gray=>alpha' \
+		-fill \\${BLUE} -draw "rectangle ${LIGHTORANGE_X},${LIGHTORANGE_X} ${LIGHTORANGE_Y},${LIGHTORANGE_Y}" \
+		-fill none -draw "color ${HALFBOX},${HALFBOX} replace" \
 		lightorangebox.png
