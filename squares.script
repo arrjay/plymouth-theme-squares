@@ -100,14 +100,23 @@ fun progbar_Advance (progress) {
 message_sprite = Sprite();
 
 fun message (text) {
-  source = Image.Text(text, 0, 0, 0, 1, "Libre Franklin Light");
+  global.W;
+  global.message_sprite;
+  global.spinline;
+  global.bottom_step;
+
+  local.source;
+  local.scalef;
+  local.scaled;
+
+  source = Image.Text(text, 0, 0, 0, 1, "Libre Franklin Light 40");
   # proportinally scale the font to the height of bottom_step
   scalef = source.GetHeight() / bottom_step;
-  scaled = source.Scale(source.GetWidth() * scalef, source.GetHeight() * scalef);
+  scaled = source.Scale(source.GetWidth() * scalef, bottom_step);
   message_sprite.SetOpacity(0);
   message_sprite.SetImage(scaled);
   # position below the progress bar so it doesn't look really off. (it's really off.)
-  message_sprite.SetPosition((W / 2) - (scaled.GetWidth() / 2), spinline.center + bottom_step * 3);
+  message_sprite.SetPosition((W / 2) - (scaled.GetWidth() / 2), spinline.center + bottom_step * 3.5);
   message_sprite.SetOpacity(1);
 }
 
