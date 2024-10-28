@@ -333,10 +333,19 @@ fun display_normal_callback () {
   if (global.dialog) {
     dialog_opacity (0);
   }
+
+  alt_reveal(style, 0);
+  spinline_Move(spinline.center);
+  image_reveal(style, 1);
+
 }
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 
 fun dialog_setup() {
+  image_reveal(style, 0);
+  spinline_Move(spinline.alt);
+  alt_reveal(style, 1);
+
   local.box;
   local.lock;
   local.entry;
