@@ -66,7 +66,7 @@ lightorangebox.png:
 		\( \
 			\( \
 				-size ${BOXTARGET}x${BOXTARGET} \
-				-define gradient:radii=${BOXTARGET},${BOXTARGET} \
+				-define gradient:radii=${TWOTHIRDBOX},${TWOTHIRDBOX} \
 				-define gradient:center=${LIGHTORANGE_X},${LIGHTORANGE_X} \
 				radial-gradient:black-white \
 			\) \
