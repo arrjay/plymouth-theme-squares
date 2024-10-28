@@ -239,7 +239,7 @@ alt_images = [];
 altimage_z = -4000;
 altarea_ratio = spinline.alt / W;
 
-fun image_altsprite(id) {
+fun image_altsprite(id, squareEdge, origSquareX, origSquareY) {
   # now, out of the top bar space, we use about 5/6? let's try it.
   # we're gonna focus a lot on spinline.alt as a holder.
   alt_images[id].destHeight = Math.Int((spinline.alt / 6) * 4);
@@ -252,6 +252,22 @@ fun image_altsprite(id) {
   alt_images[id].sprite.SetOpacity(0);
   alt_images[id].sprite.SetImage(alt_images[id].scaled);
   alt_images[id].sprite.SetPosition(alt_images[id].posX, alt_images[id].posY, altimage_z);
+
+  # handle the box inlay image
+  alt_images[id].scale_factor = (alt_images[id].scaled.GetWidth() / alt_images[id].source.GetWidth());
+  alt_images[id].boxedge_px = Math.Int(squareEdge * alt_images[id].scale_factor);
+  # size we wish to put in box
+  alt_images[id].boxfill_px = Math.Int(alt_images[id].boxedge_px * 0.9);
+  alt_images[id].boxfill_scaled = image[id].boxfill_source.Scale(alt_images[id].boxfill_px, alt_images[id].boxfill_px);
+  # place the box in the center of the empty space.
+  alt_images[id].boxspace_centerX = Math.Int(alt_images[id].posX + (origSquareX * alt_images[id].scale_factor) + (alt_images[id].boxedge_px / 2));
+  alt_images[id].boxspace_centerY = Math.Int(alt_images[id].posY + (origSquareY * alt_images[id].scale_factor) + (alt_images[id].boxedge_px / 2));
+  alt_images[id].boxfill_X = alt_images[id].boxspace_centerX - (alt_images[id].boxfill_px / 2);
+  alt_images[id].boxfill_Y = alt_images[id].boxspace_centerY - (alt_images[id].boxfill_px / 2);
+  alt_images[id].boxfill_sprite = Sprite();
+  alt_images[id].boxfill_sprite.SetOpacity(0);
+  alt_images[id].boxfill_sprite.SetImage(alt_images[id].boxfill_scaled);
+  alt_images[id].boxfill_sprite.SetPosition(alt_images[id].boxfill_X, alt_images[id].boxfill_Y, altimage_z + 1);
 
   # we stole the text from the main image...
   alt_images[id].version_scaleY = Math.Int(alt_images[id].destHeight / 1.35);
@@ -291,10 +307,11 @@ fun alt_reveal (id, opacity) {
   alt_images[id].version_sprite.SetOpacity(opacity);
   alt_images[id].distro_sprite.SetOpacity(opacity);
   alt_images[id].edition_sprite.SetOpacity(opacity);
+  alt_images[id].boxfill_sprite.SetOpacity(opacity);
 }
 
-image_altsprite("pro");
-image_altsprite("srv");
+image_altsprite("pro", 55, 5, 5);
+image_altsprite("srv", 58, 39, 11);
 
 # MAIN SCREEN TURN ON
 image_reveal(style, 1);
