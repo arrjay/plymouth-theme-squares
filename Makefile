@@ -9,9 +9,11 @@ BLUE := \#0000ff
 # pixels
 BOXTARGET := 256
 
+DOUBLEBOX := $(shell echo "${BOXTARGET}*2" | bc)
 QUARTERBOX := $(shell echo "${BOXTARGET}*0.25" | bc)
 THIRDBOX := $(shell echo "${BOXTARGET}/3" | bc)
 HALFBOX := $(shell echo "${BOXTARGET}*0.5" | bc)
+EIGHTHBOX := $(shell echo "${BOXTARGET}/8" | bc)
 TWOTHIRDBOX := $(shell echo "${BOXTARGET}-${THIRDBOX}" | bc)
 THREEQUARTERBOX := $(shell echo "${BOXTARGET}*0.75" | bc)
 THIRTEENSIXTEENTHSBOX := $(shell echo "${BOXTARGET}*0.8125" | bc)
@@ -28,8 +30,10 @@ LIGHTORANGE_WIDTH := $(shell echo "${BOXTARGET}/13.2307" | bc)
 LIGHTORANGE_X := ${LIGHTORANGE_WIDTH}
 LIGHTORANGE_Y := $(shell echo "${BOXTARGET}-${LIGHTORANGE_WIDTH}" | bc)
 
-YELLOWGREEN_WIDTH := $(shell echo "${BOXTARGET}/12.8333" | bc)
-YELLOWGREEN_HALFWIDTH := $(shell echo "${YELLOWGREEN_WIDTH}/2" | bc)
+YELLOWGREEN_WIDTH := $(shell echo "${BOXTARGET}/10.8333" | bc)
+YELLOWGREEN_WIDTHONEHALF := $(shell echo "${YELLOWGREEN_WIDTH}*1.5" | bc)
+YELLOWGREEN_X := ${YELLOWGREEN_WIDTH}
+YELLOWGREEN_Y := $(shell echo "${BOXTARGET}-${YELLOWGREEN_X}" | bc)
 
 white.png:
 	magick -size 1x1 canvas:#ffffff white.png
@@ -90,7 +94,29 @@ lightorangebox.png:
 
 yelgrnbox.png:
 	magick -size ${BOXTARGET}x${BOXTARGET} \
-		-define gradient:radii=${HALFBOX},${BOXTARGET} \
-		-define gradient:center=${YELLOWGREEN_HALFWIDTH},${BOXTARGET} \
+		-define gradient:radii=${TWOTHIRDBOX},${BOXTARGET} \
+		-define gradient:angle=0 \
+		-define gradient:center=0,${BOXTARGET} \
 		radial-gradient:${YELLOW}-${GREEN} \
+		-fill \${YELLOW} -draw "rectangle 0,0 ${YELLOWGREEN_X},${THREEQUARTERBOX}" \
+		\( \
+			\( \
+				-size ${BOXTARGET}x${BOXTARGET} \
+				-define gradient:radii=${QUARTERBOX},${QUARTERBOX} \
+				-define gradient:center=${BOXTARGET},${BOXTARGET} \
+				radial-gradient:black-white \
+			\) \
+			\( \
+				-size ${BOXTARGET}x${BOXTARGET} \
+				-define gradient:radii=${BOXTARGET},${THREEQUARTERBOX} \
+				-define gradient:center=0,0 \
+				radial-gradient:black-white \
+			\) \
+			-compose Darken -composite \
+			-fill black -draw "rectangle ${YELLOWGREEN_X},${YELLOWGREEN_X} ${YELLOWGREEN_Y},${YELLOWGREEN_Y}" \
+			-fill black -draw "rectangle ${YELLOWGREEN_X},0 ${BOXTARGET},${YELLOWGREEN_Y}" \
+			-fill black -draw "rectangle 0,0 ${HALFBOX},${QUARTERBOX}" \
+			-channel-fx '|gray=>alpha' \
+		\) \
+		-compose copy-opacity -composite \
 		yelgrnbox.png
