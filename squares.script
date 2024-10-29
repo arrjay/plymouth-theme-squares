@@ -58,6 +58,7 @@ spinline.sprite.SetPosition(0, 0 - spinline.scale, statbars_z);
 
 # move the spinner
 fun spinline_Move(pos) {
+  global.spinline;
   spinline.sprite.SetOpacity(0);
   spinline.sprite.SetY(pos - (spinline.scale / 2));
   spinline.sprite.SetOpacity(1);
@@ -174,7 +175,7 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
 
   # handle the box inlay image
   global.distro;
-  local.boxfill;
+  global.boxfill; # the alt images use the same box fill source (distro logo)
   local.boxspace;
   boxfill.source = Image(distro.box);
   # size we wish to put in box
@@ -212,9 +213,9 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
 
   # we put the space with the version number so it's condensed to shit
   local.version;
-  version.text = Image.Text(" " + distro.version, 0, 0, 0, 1, "Libre Franklin Regular 80");
+  image[id].version_source = Image.Text(" " + distro.version, 0, 0, 0, 1, "Libre Franklin Regular 80");
   # fuck with the X scale to compress the version number (emulate narrow font?)
-  version.sizeY = Math.Int(version.text.GetHeight() / text_target_size * text_scale_target * 0.5);
+  version.sizeY = Math.Int(image[id].version_source.GetHeight() / text_target_size * text_scale_target * 0.5);
   # !!! below is reused for aligning the *next row* (edition) of text too !!!
   version.sizeX = Math.Int(text_scale_target);
   version.scaled = version.text.Scale(version.sizeX, version.sizeY);
@@ -226,12 +227,12 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
                                        mainimage_z);
 
   local.dt;
-  dt.source = Image.Text(distro.name, 0, 0, 0, 1, "Libre Franklin Black 100");
+  image[id].distro_source = Image.Text(distro.name, 0, 0, 0, 1, "Libre Franklin Black 100");
   # we're not trying to condense the distro name, notably.
-  dt.sizeX = Math.Int(dt.source.GetHeight() / text_target_size * text_scale_target);
+  dt.sizeX = Math.Int(image[id].distro_source.GetHeight() / text_target_size * text_scale_target);
   # in fact we made it bigger
   dt.sizeY = Math.Int(text_scale_target * 1.2);
-  dt.scaled = dt.source.Scale(dt.sizeX, dt.sizeY);
+  dt.scaled = image[id].distro_source.Scale(dt.sizeX, dt.sizeY);
   image[id].distro_sprite = Sprite();
   image[id].distro_sprite.SetOpacity(0);
   image[id].distro_sprite.SetImage(dt.scaled);
@@ -241,11 +242,11 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
                                       mainimage_z);
 
   local.edition;
-  edition.text = Image.Text(distro.edition, 0, 0, 0, 1, "Libre Franklin Black 90");
-  edition.sizeX = Math.Int(edition.text.GetHeight() / text_target_size * text_scale_target);
+  image[id].edition_source = Image.Text(distro.edition, 0, 0, 0, 1, "Libre Franklin Black 90");
+  edition.sizeX = Math.Int(image[id].edition_source.GetHeight() / text_target_size * text_scale_target);
   # scrungle
   edition.sizeY = Math.Int(text_scale_target * 0.5);
-  edition.scaled = edition.text.Scale(edition.sizeX, edition.sizeY);
+  edition.scaled = image[id].edition_source.Scale(edition.sizeX, edition.sizeY);
   image[id].edition_sprite = Sprite();
   image[id].edition_sprite.SetOpacity(0);
   image[id].edition_sprite.SetImage(edition.scaled);
@@ -275,88 +276,100 @@ image_sprite("pro", 3.0622, 2.448979, -54, -146, 145, 20, 13);
 image_sprite("srv", 2.75862, 2.448979, -123, -165, 131, 55, 18);
 
 # something that sorks as the alternate rendering (for verbose/status boots)
-alt_images = [];
+alts = [];
 altimage_z = -4000;
 altarea_ratio = spinline.alt / W;
 
 fun image_altsprite(id, squareEdge, origSquareX, origSquareY) {
+  global.alts;
+
+  local.destHeight;
   # now, out of the top bar space, we use about 5/6? let's try it.
   # we're gonna focus a lot on spinline.alt as a holder.
-  alt_images[id].destHeight = Math.Int((spinline.alt / 6) * 4);
-  alt_images[id].source = Image("squares-alt-" + id + ".png");
-  alt_images[id].scaleX = Math.Int((alt_images[id].destHeight / alt_images[id].source.GetHeight()) * alt_images[id].source.GetWidth());
-  alt_images[id].scaled = alt_images[id].source.Scale(alt_images[id].scaleX, alt_images[id].destHeight);
-  alt_images[id].posX = W / 6;
-  alt_images[id].posY = (spinline.alt / 2) - (alt_images[id].destHeight / 2);
-  alt_images[id].sprite = Sprite();
-  alt_images[id].sprite.SetOpacity(0);
-  alt_images[id].sprite.SetImage(alt_images[id].scaled);
-  alt_images[id].sprite.SetPosition(alt_images[id].posX, alt_images[id].posY, altimage_z);
+  destHeight = Math.Int((spinline.alt / 6) * 4);
+
+  # rather than forcing the inlay to the scaling factor, we just try all we can in the top area.
+  local.mainimage;
+  mainimage.source = Image("squares-alt-" + id + ".png");
+  mainimage.sizeX = Math.Int((destHeight / mainimage.source.GetHeight()) * mainimage.source.GetWidth());
+  # so, sizeY _is_ destHeight
+  mainimage.scaled = mainimage.source.Scale(mainimage.sizeX, destHeight);
+  # position it 1/6th across the full screen
+  mainimage.posX = W / 6;
+  mainimage.posY = (spinline.alt / 2) - (destHeight / 2);
+  alts[id].sprite = Sprite();
+  alts[id].sprite.SetOpacity(0);
+  alts[id].sprite.SetImage(mainimage.scaled);
+  alts[id].sprite.SetPosition(mainimage.posX, mainimage.posY, altimage_z);
 
   # handle the box inlay image
-  alt_images[id].scale_factor = (alt_images[id].scaled.GetWidth() / alt_images[id].source.GetWidth());
-  alt_images[id].boxedge_px = Math.Int(squareEdge * alt_images[id].scale_factor);
+  local.scale_factor;
+  scale_factor = (mainimage.sizeX / mainimage.source.GetWidth());
+  local.boxedge;
+  boxedge.size = Math.Int(squareEdge * scale_factor);
   # size we wish to put in box
-  alt_images[id].boxfill_px = Math.Int(alt_images[id].boxedge_px * 0.9);
-  alt_images[id].boxfill_scaled = image[id].boxfill_source.Scale(alt_images[id].boxfill_px, alt_images[id].boxfill_px);
+  local.altbox;
+  altbox.size = Math.Int(boxedge.size * 0.9);
+  # pull the *source* image out of the main image stack
+  global.boxfill;
+  altbox.scaled = boxfill.source.Scale(altbox.size, altbox.size);
   # place the box in the center of the empty space.
-  alt_images[id].boxspace_centerX = Math.Int(alt_images[id].posX + (origSquareX * alt_images[id].scale_factor) + (alt_images[id].boxedge_px / 2));
-  alt_images[id].boxspace_centerY = Math.Int(alt_images[id].posY + (origSquareY * alt_images[id].scale_factor) + (alt_images[id].boxedge_px / 2));
-  alt_images[id].boxfill_X = alt_images[id].boxspace_centerX - (alt_images[id].boxfill_px / 2);
-  alt_images[id].boxfill_Y = alt_images[id].boxspace_centerY - (alt_images[id].boxfill_px / 2);
-  alt_images[id].boxfill_sprite = Sprite();
-  alt_images[id].boxfill_sprite.SetOpacity(0);
-  alt_images[id].boxfill_sprite.SetImage(alt_images[id].boxfill_scaled);
-  alt_images[id].boxfill_sprite.SetPosition(alt_images[id].boxfill_X, alt_images[id].boxfill_Y, altimage_z + 1);
+  altbox.space.centerX = Math.Int(mainimage.posX + (origSquareX * scale_factor) + (boxedge.size / 2));
+  altbox.space.centerY = Math.Int(mainimage.posY + (origSquareY * scale_factor) + (boxedge.size / 2));
+  altbox.fill.posX = altbox.space.centerX - (altbox.scaled.GetWidth() / 2);
+  altbox.fill.posY = altbox.space.centerY - (altbox.scaled.GetHeight() / 2);
+  alts[id].boxsprite = Sprite();
+  alts[id].boxsprite.SetOpacity(0);
+  alts[id].boxsprite.SetImage(altbox.scaled);
+  alts[id].boxsprite.SetPosition(altbox.fill.posX, altbox.fill.posY, altimage_z + 1);
 
   # we stole the text from the main image...
-  alt_images[id].version_scaleY = Math.Int(alt_images[id].destHeight / 1.35);
-  alt_images[id].version_scaleX = Math.Int((alt_images[id].version_scaleY / image[id].version_text.GetHeight()) * image[id].version_text.GetWidth());
-  alt_images[id].version_scaled = image[id].version_text.Scale(alt_images[id].version_scaleX, alt_images[id].version_scaleY);
-  alt_images[id].version_sprite = Sprite();
-  alt_images[id].version_sprite.SetOpacity(0);
-  alt_images[id].version_sprite.SetImage(alt_images[id].version_scaled);
-  alt_images[id].version_sprite.SetPosition((alt_images[id].posX * 5) - alt_images[id].version_scaleX,
-                                            Math.Int(((spinline.alt / 3) * 2) - (alt_images[id].version_scaleY * 0.9)),
-                                            altimage_z);
+  local.version;
+  global.spinline;
+  version.sizeY = Math.Int(destHeight / 1.35);
+  version.sizeX = Math.Int((version.sizeY / image[id].version_source.GetHeight()) * image[id].version_source.GetWidth());
+  version.scaled = image[id].version_source.Scale(version.sizeX, version.sizeY);
+  alts[id].version_sprite = Sprite();
+  alts[id].version_sprite.SetOpacity(0);
+  alts[id].version_sprite.SetImage(version.scaled);
+  alts[id].version_sprite.SetPosition((mainimage.posX * 5) - version.sizeX,
+                                       Math.Int(((spinline.alt / 3) * 2) - (version.sizeY * 0.9)),
+                                       altimage_z);
 
-  alt_images[id].distro_scaleY = Math.Int(alt_images[id].destHeight);
-  alt_images[id].distro_scaleX = Math.Int((alt_images[id].distro_scaleY / image[id].distro_text.GetHeight()) * image[id].distro_text.GetWidth());
-  alt_images[id].distro_scaled = image[id].distro_text.Scale(alt_images[id].distro_scaleX, alt_images[id].distro_scaleY);
-  alt_images[id].distro_sprite = Sprite();
-  alt_images[id].distro_sprite.SetOpacity(0);
-  alt_images[id].distro_sprite.SetImage(alt_images[id].distro_scaled);
-  alt_images[id].distro_sprite.SetPosition((alt_images[id].posX * 5) - alt_images[id].version_scaleX - alt_images[id].distro_scaleX,
-                                           Math.Int(((spinline.alt / 3) * 2) - alt_images[id].distro_scaleY + (alt_images[id].distro_scaleY / 8)),
-                                           altimage_z);
+  local.dt;
+  dt.sizeY = Math.Int(destHeight);
+  dt.sizeX = Math.Int((dt.sizeY / image[id].distro_source.GetHeight()) * image[id].distro_source.GetWidth());
+  dt.scaled = image[id].distro_source.Scale(dt.sizeX, dt.sizeY);
+  alts[id].distro_sprite = Sprite();
+  alts[id].distro_sprite.SetOpacity(0);
+  alts[id].distro_sprite.SetImage(dt.scaled);
+  alts[id].distro_sprite.SetPosition((mainimage.posX * 5) - version.sizeX - dt.sizeX,
+                                     Math.Int(((spinline.alt / 3) * 2) - dt.sizeY + (dt.sizeY / 8)),
+                                     altimage_z);
 
-  alt_images[id].edition_scaleI = Math.Int(alt_images[id].destHeight);
-  alt_images[id].edition_scaleY = Math.Int(alt_images[id].edition_scaleI * 0.28);
-  alt_images[id].edition_scaleX = Math.Int((alt_images[id].edition_scaleI / image[id].edition_text.GetHeight()) * image[id].version_text.GetWidth());
-  alt_images[id].edition_scaled = image[id].edition_text.Scale(alt_images[id].edition_scaleX, alt_images[id].edition_scaleY);
-  alt_images[id].edition_sprite = Sprite();
-  alt_images[id].edition_sprite.SetOpacity(0);
-  alt_images[id].edition_sprite.SetImage(alt_images[id].edition_scaled);
-  alt_images[id].edition_sprite.SetPosition((alt_images[id].posX * 5) - alt_images[id].edition_scaleX,
-                                            Math.Int(((spinline.alt / 3) * 2) - (alt_images[id].edition_scaleY / 3)),
-                                            altimage_z);
+  local.edition;
+  edition.referenceI = Math.Int(destHeight);
+  edition.sizeY = Math.Int(edition.referenceI * 0.28);
+  edition.sizeX = Math.Int((edition.referenceI / image[id].edition_source.GetHeight()) * image[id].version_source.GetWidth());
+  edition.scaled = image[id].edition_source.Scale(edition.sizeX, edition.sizeY);
+  alts[id].edition_sprite = Sprite();
+  alts[id].edition_sprite.SetOpacity(0);
+  alts[id].edition_sprite.SetImage(edition.scaled);
+  alts[id].edition_sprite.SetPosition((mainimage.posX * 5) - edition.sizeX,
+                                      Math.Int(((spinline.alt / 3) * 2) - (edition.sizeY / 3)),
+                                      altimage_z);
 }
 
 fun alt_reveal (id, opacity) {
-  alt_images[id].sprite.SetOpacity(opacity);
-  alt_images[id].version_sprite.SetOpacity(opacity);
-  alt_images[id].distro_sprite.SetOpacity(opacity);
-  alt_images[id].edition_sprite.SetOpacity(opacity);
-  alt_images[id].boxfill_sprite.SetOpacity(opacity);
+  alts[id].sprite.SetOpacity(opacity);
+  alts[id].version_sprite.SetOpacity(opacity);
+  alts[id].distro_sprite.SetOpacity(opacity);
+  alts[id].edition_sprite.SetOpacity(opacity);
+  alts[id].boxsprite.SetOpacity(opacity);
 }
 
-#image_altsprite("pro", 55, 5, 5);
-#image_altsprite("srv", 58, 39, 11);
-
-# MAIN SCREEN TURN ON
-image_reveal(style, 1);
-#alt_reveal(style, 1);
-#spinline_Move(spinline.alt);
+image_altsprite("pro", 55, 5, 5);
+image_altsprite("srv", 58, 39, 11);
 
 # hook the boot progress callback to update the spinner, progress bar
 fun progress_callback (time, prog) {
