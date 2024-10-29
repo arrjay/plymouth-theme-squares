@@ -138,25 +138,34 @@ screen_center.y = H / 2;
 image = [];
 mainimage_z = -5000;
 
+hline = Image("black.png").Scale(W, 1);
+hline1 = Sprite(hline);
+hline1.SetPosition(0, screen_center.y);
+hline2 = Sprite(hline);
+#spinline.center = H - ((H / 16) * 2);
+hline2.SetPosition(0, Math.Int(H / 16) * 2);
+hline3 = Sprite(hline);
+hline3.SetPosition(0, Math.Int(H / 16) * 9);
+hline4 = Sprite(hline);
+hline4.SetPosition(0, Math.Int(H / 16) * 11);
+vline = Image("black.png").Scale(1, spinline.center);
+vline1 = Sprite(vline);
+vline1.SetPosition(screen_center.x, 0);
+
 fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, origSquareX, origSquareY) {
   image[id].source = Image("squares-" + id + ".png");
   # we want to keep the image aspect as it is, so figure out the bigger of the
   # dimensions on screen and scale in proportion
-  image[id].ratio = image[id].source.GetHeight() / image[id].source.GetWidth();
-  if (screen_ratio > image[id].ratio) {
-    image[id].scale_factor = origScaleX * image[id].ratio * 0.9;
-  } else {
-    image[id].scale_factor = origScaleY * image[id].ratio * 0.9;
-  }
-  image[id].scaleMidX = Math.Int(image[id].scale_factor * origMidX);
-  image[id].scaleMidY = Math.Int(image[id].scale_factor * origMidY);
+  image[id].scaleSizeY = Math.Int(H / 16 * 7);
+  image[id].scale_factor = image[id].scaleSizeY / image[id].source.GetHeight();
   image[id].scaleSizeX = Math.Int(image[id].scale_factor * image[id].source.GetWidth());
-  image[id].scaleSizeY = Math.Int(image[id].scale_factor * image[id].source.GetHeight());
   image[id].scaled = image[id].source.Scale(image[id].scaleSizeX, image[id].scaleSizeY);
   image[id].sprite = Sprite();
   image[id].sprite.SetOpacity(0);
   image[id].sprite.SetImage(image[id].scaled);
-  image[id].sprite.SetPosition(screen_center.x + image[id].scaleMidX, screen_center.y + image[id].scaleMidY, mainimage_z);
+  image[id].posX = Math.Int(screen_center.x - (image[id].scaled.GetWidth() / 2));
+  image[id].posY = Math.Int(H / 16 * 2);
+  image[id].sprite.SetPosition(image[id].posX, image[id].posY, mainimage_z);
 
   # handle the box inlay image
   image[id].boxfill_source = Image(distro.box);
@@ -166,8 +175,8 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
   image[id].boxfill_px = Math.Int(image[id].boxedge_px * 0.9);
   image[id].boxfill_scaled = image[id].boxfill_source.Scale(image[id].boxfill_px, image[id].boxfill_px);
   # place the box in the center of the empty space.
-  image[id].boxspace_centerX = Math.Int(screen_center.x + image[id].scaleMidX + (origSquareX * image[id].scale_factor) + (image[id].boxedge_px / 2));
-  image[id].boxspace_centerY = Math.Int(screen_center.y + image[id].scaleMidY + (origSquareY * image[id].scale_factor) + (image[id].boxedge_px / 2));
+  image[id].boxspace_centerX = Math.Int(image[id].posX + (origSquareX * image[id].scale_factor) + (image[id].boxedge_px / 2));
+  image[id].boxspace_centerY = Math.Int(image[id].posY + (origSquareY * image[id].scale_factor) + (image[id].boxedge_px / 2));
   image[id].boxfill_X = image[id].boxspace_centerX - (image[id].boxfill_px / 2);
   image[id].boxfill_Y = image[id].boxspace_centerY - (image[id].boxfill_px / 2);
   image[id].boxfill_sprite = Sprite();
