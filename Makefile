@@ -35,6 +35,10 @@ YELLOWGREEN_WIDTHONEHALF := $(shell echo "${YELLOWGREEN_WIDTH}*1.5" | bc)
 YELLOWGREEN_X := ${YELLOWGREEN_WIDTH}
 YELLOWGREEN_Y := $(shell echo "${BOXTARGET}-${YELLOWGREEN_X}" | bc)
 
+BLUE_WIDTH := $(shell echo "${BOXTARGET}/6.9090" | bc)
+BLUE_X := ${BLUE_WIDTH}
+BLUE_Y := $(shell echo "${BOXTARGET}-${BLUE_WIDTH}" | bc)
+
 white.png:
 	magick -size 1x1 canvas:#ffffff white.png
 
@@ -121,4 +125,13 @@ bluebox.png:
 	magick -size ${BOXTARGET}x${BOXTARGET} \
 		-define gradient:direction=North \
 		gradient:${DARKBLUE}-${LIGHTBLUE} \
+		\( \
+			-size ${BOXTARGET}x${BOXTARGET} \
+			-define gradient:radii=${EIGHTBOX},${EIGHTBOX} \
+			-define gradient:center=${BOXTARGET},0 \
+			radial-gradient:black-white \
+			-fill black -draw "rectangle 0,0 ${BLUE_Y},${BLUE_Y}" \
+			-channel-fx '|gray=>alpha' \
+		\) \
+		-compose copy-opacity -composite \
 		bluebox.png
