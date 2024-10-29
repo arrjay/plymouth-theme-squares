@@ -3,8 +3,8 @@ ORANGE_MID := \#d85e00
 ORANGE_LIGHT := \#efbe6a
 YELLOW := \#ffce00
 GREEN := \#008600
-
-BLUE := \#0000ff
+DARKBLUE := \#00299c
+LIGHTBLUE := \#0099ff
 
 # pixels
 BOXTARGET := 256
@@ -116,3 +116,9 @@ yelgrnbox.png:
 		\) \
 		-compose copy-opacity -composite \
 		yelgrnbox.png
+
+bluebox.png:
+	magick -size ${BOXTARGET}x${BOXTARGET} \
+		-define gradient:direction=North \
+		gradient:${DARKBLUE}-${LIGHTBLUE} \
+		bluebox.png
