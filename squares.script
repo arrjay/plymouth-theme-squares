@@ -197,7 +197,14 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
   local.text_top_boundary;
   local.text_scale_target;
   local.text_target_size;
-  text_right_align = Math.Int((scale_factor * 35) + pos_sprite.X + mainimage.scaled.GetWidth());
+  local.pixel_shift;
+  # adjust the multipliers here to shift by more pixels, if you like
+  if (id == "srv") {
+    pixel_shift = -60;
+  } else {
+    pixel_shift = 1;
+  }
+  text_right_align = Math.Int((scale_factor * pixel_shift) + pos_sprite.X + mainimage.scaled.GetWidth());
   text_top_boundary = Math.Int(mainimage.posY + mainimage.scaleY);
   text_scale_target = Math.Int(H / 9);
   text_target_size = 64;
@@ -262,7 +269,7 @@ fun image_reveal (id, opacity) {
 # the fifth argument here is the size of the side of a square inside the nest...
 # and the two args after that are the x/y of where that square begins.
 image_sprite("pro", 3.0622, 2.448979, -54, -146, 145, 20, 13);
-#image_sprite("srv", 2.75862, 2.448979, -123, -165, 131, 55, 18);
+image_sprite("srv", 2.75862, 2.448979, -123, -165, 131, 55, 18);
 
 # something that sorks as the alternate rendering (for verbose/status boots)
 alt_images = [];
