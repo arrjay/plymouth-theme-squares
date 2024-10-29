@@ -147,22 +147,23 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
   global.H;
   global.screen_center;
   global.mainimage_z;
+  global.image;
   # this is calculating the box that holds the OS logo, and everything can shift based on that.
   # the *sprite* is handy for debugging.
   pos_sprite.Y = Math.Int((H / 16) * 2);
-  pos_sprite.szS = Math.Int((H / 16) * 6);	# because...it's a square
-  pos_sprite.X = Math.Int(screen_center.x - (pos_sprite.szS / 2));
-  #image[id].pos_sprite = Sprite(Image("black.png").Scale(image[id].pos_sprite_szS, image[id].pos_sprite_szS));
-  #image[id].pos_sprite.SetPosition(image[id].pos_sprite_X, image[id].pos_sprite_Y, mainimage_z - 10);
+  pos_sprite.size_edge = Math.Int((H / 16) * 6);	# because...it's a square
+  pos_sprite.X = Math.Int(screen_center.x - (pos_sprite.size_edge / 2));
+  #image[id].pos_sprite.sprite = Sprite(Image("black.png").Scale(pos_sprite.size_edge, pos_sprite.size_edge));
+  #image[id].pos_sprite.sprite.SetPosition(pos_sprite.X, pos_sprite.Y, mainimage_z - 10);
 
   local.scale_factor;
-  scale_factor = pos_sprite.szS / squareEdge;	# scale by the target box you can't easily see...
+  scale_factor = pos_sprite.size_edge / squareEdge;	# scale by the target box you can't easily see...
 
   local.mainimage;
   mainimage.source = Image("squares-" + id + ".png");
-  mainimage.scaleX = Math.Int(scale_factor * mainimage.source.GetWidth());
-  mainimage.scaleY = Math.Int(scale_factor * mainimage.source.GetHeight());
-  mainimage.scaled = mainimage.source.Scale(mainimage.scaleX, mainimage.scaleY);
+  mainimage.sizeX = Math.Int(scale_factor * mainimage.source.GetWidth());
+  mainimage.sizeY = Math.Int(scale_factor * mainimage.source.GetHeight());
+  mainimage.scaled = mainimage.source.Scale(mainimage.sizeX, mainimage.sizeY);
   image[id].sprite = Sprite();
   image[id].sprite.SetOpacity(0);
   image[id].sprite.SetImage(mainimage.scaled);
@@ -177,17 +178,17 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
   local.boxspace;
   boxfill.source = Image(distro.box);
   # size we wish to put in box
-  boxfill.px = Math.Int(pos_sprite.szS * 0.9);
+  boxfill.px = Math.Int(pos_sprite.size_edge * 0.9);
   boxfill.scaled = boxfill.source.Scale(boxfill.px, boxfill.px);
   # place the box in the center of the empty space.
-  boxspace.X = Math.Int(pos_sprite.X + (pos_sprite.szS / 2));
-  boxspace.Y = Math.Int(pos_sprite.Y + (pos_sprite.szS / 2));
-  boxfill.X = boxspace.X - (boxfill.px / 2);
-  boxfill.Y = boxspace.Y - (boxfill.px / 2);
+  boxspace.X = Math.Int(pos_sprite.X + (pos_sprite.size_edge / 2));
+  boxspace.Y = Math.Int(pos_sprite.Y + (pos_sprite.size_edge / 2));
+  boxfill.posX = boxspace.X - (boxfill.px / 2);
+  boxfill.posY = boxspace.Y - (boxfill.px / 2);
   image[id].boxfill_sprite = Sprite();
   image[id].boxfill_sprite.SetOpacity(0);
   image[id].boxfill_sprite.SetImage(boxfill.scaled);
-  image[id].boxfill_sprite.SetPosition(boxfill.X, boxfill.Y, mainimage_z + 1);
+  image[id].boxfill_sprite.SetPosition(boxfill.posX, boxfill.posY, mainimage_z + 1);
 
   # oh boy. now to make plymouth draw pretty *text*
   # we want to left-align all the text, so we're gonna order the sprites
@@ -205,7 +206,7 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
     pixel_shift = 1;
   }
   text_right_align = Math.Int((scale_factor * pixel_shift) + pos_sprite.X + mainimage.scaled.GetWidth());
-  text_top_boundary = Math.Int(mainimage.posY + mainimage.scaleY);
+  text_top_boundary = Math.Int(mainimage.posY + mainimage.sizeY);
   text_scale_target = Math.Int(H / 9);
   text_target_size = 64;
 
@@ -213,9 +214,10 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
   local.version;
   version.text = Image.Text(" " + distro.version, 0, 0, 0, 1, "Libre Franklin Regular 80");
   # fuck with the X scale to compress the version number (emulate narrow font?)
-  version.scaleY = Math.Int(version.text.GetHeight() / text_target_size * text_scale_target * 0.5);
-  version.scaleX = Math.Int(text_scale_target);
-  version.scaled = version.text.Scale(version.scaleX, version.scaleY);
+  version.sizeY = Math.Int(version.text.GetHeight() / text_target_size * text_scale_target * 0.5);
+  # !!! below is reused for aligning the *next row* (edition) of text too !!!
+  version.sizeX = Math.Int(text_scale_target);
+  version.scaled = version.text.Scale(version.sizeX, version.sizeY);
   image[id].version_sprite = Sprite();
   image[id].version_sprite.SetOpacity(0);
   image[id].version_sprite.SetImage(version.scaled);
@@ -226,29 +228,29 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
   local.dt;
   dt.source = Image.Text(distro.name, 0, 0, 0, 1, "Libre Franklin Black 100");
   # we're not trying to condense the distro name, notably.
-  dt.scaleX = Math.Int(dt.source.GetHeight() / text_target_size * text_scale_target);
+  dt.sizeX = Math.Int(dt.source.GetHeight() / text_target_size * text_scale_target);
   # in fact we made it bigger
-  dt.scaleY = Math.Int(text_scale_target * 1.2);
-  dt.scaled = dt.source.Scale(dt.scaleX, dt.scaleY);
+  dt.sizeY = Math.Int(text_scale_target * 1.2);
+  dt.scaled = dt.source.Scale(dt.sizeX, dt.sizeY);
   image[id].distro_sprite = Sprite();
   image[id].distro_sprite.SetOpacity(0);
   image[id].distro_sprite.SetImage(dt.scaled);
-  image[id].distro_sprite.SetPosition(text_right_align - dt.scaleX,
+  image[id].distro_sprite.SetPosition(text_right_align - dt.sizeX,
                                       # compensate for us making the text bigger
-                                      Math.Int(text_top_boundary - (dt.scaleY * 0.1)),
+                                      Math.Int(text_top_boundary - (dt.sizeY * 0.1)),
                                       mainimage_z);
 
   local.edition;
   edition.text = Image.Text(distro.edition, 0, 0, 0, 1, "Libre Franklin Black 90");
-  edition.scaleX = Math.Int(edition.text.GetHeight() / text_target_size * text_scale_target);
+  edition.sizeX = Math.Int(edition.text.GetHeight() / text_target_size * text_scale_target);
   # scrungle
-  edition.scaleY = Math.Int(text_scale_target * 0.5);
-  edition.scaled = edition.text.Scale(edition.scaleX, edition.scaleY);
+  edition.sizeY = Math.Int(text_scale_target * 0.5);
+  edition.scaled = edition.text.Scale(edition.sizeX, edition.sizeY);
   image[id].edition_sprite = Sprite();
   image[id].edition_sprite.SetOpacity(0);
   image[id].edition_sprite.SetImage(edition.scaled);
-  image[id].edition_sprite.SetPosition(text_right_align + (version.scaleX / 2) - edition.scaleX,
-                                       text_top_boundary + version.scaleY - (edition.scaleY / 2),
+  image[id].edition_sprite.SetPosition(text_right_align + (version.sizeX / 2) - edition.sizeX,
+                                       text_top_boundary + version.sizeY - (edition.sizeY / 2),
                                        mainimage_z);
 }
 
@@ -259,6 +261,7 @@ fun image_reveal (id, opacity) {
   image[id].distro_sprite.SetOpacity(opacity);
   image[id].edition_sprite.SetOpacity(opacity);
   image[id].boxfill_sprite.SetOpacity(opacity);
+  # the positioning sprite shouldn't be normally defined
   image[id].pos_sprite.SetOpacity(opacity * 0.5);
 }
 
