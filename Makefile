@@ -1,6 +1,8 @@
 ORANGE_DARK := \#d73b00
 ORANGE_MID := \#d85e00
 ORANGE_LIGHT := \#efbe6a
+YELLOW := \#ffce00
+GREEN := \#008600
 
 BLUE := \#0000ff
 
@@ -25,6 +27,9 @@ DARKORANGE_Y := $(shell echo "${BOXTARGET}-${DARKORANGE_WIDTH}" | bc)
 LIGHTORANGE_WIDTH := $(shell echo "${BOXTARGET}/13.2307" | bc)
 LIGHTORANGE_X := ${LIGHTORANGE_WIDTH}
 LIGHTORANGE_Y := $(shell echo "${BOXTARGET}-${LIGHTORANGE_WIDTH}" | bc)
+
+YELLOWGREEN_WIDTH := $(shell echo "${BOXTARGET}/12.8333" | bc)
+YELLOWGREEN_HALFWIDTH := $(shell echo "${YELLOWGREEN_WIDTH}/2" | bc)
 
 white.png:
 	magick -size 1x1 canvas:#ffffff white.png
@@ -82,3 +87,10 @@ lightorangebox.png:
 		\) \
 		-compose copy-opacity -composite \
 		lightorangebox.png
+
+yelgrnbox.png:
+	magick -size ${BOXTARGET}x${BOXTARGET} \
+		-define gradient:radii=${HALFBOX},${BOXTARGET} \
+		-define gradient:center=${YELLOWGREEN_HALFWIDTH},${BOXTARGET} \
+		radial-gradient:${YELLOW}-${GREEN} \
+		yelgrnbox.png
