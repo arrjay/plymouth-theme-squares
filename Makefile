@@ -39,31 +39,40 @@ BLUE_WIDTH := $(shell echo "${BOXTARGET}/6.9090" | bc)
 BLUE_X := ${BLUE_WIDTH}
 BLUE_Y := $(shell echo "${BOXTARGET}-${BLUE_WIDTH}" | bc)
 
-white.png:
+FILES := white.png gray.png blue.png darkgray.png black.png darkorange.png \
+	midorange.png lightorange.png darkorangebox.png lightorangebox.png \
+	yelgrnbox.png bluebox.png
+
+all: $(FILES)
+
+clean:
+	-rm ${FILES}
+
+white.png: Makefile
 	magick -size 1x1 canvas:#ffffff white.png
 
-gray.png:
+gray.png: Makefile
 	magick -size 1x1 canvas:#c0c0c0 gray.png
 
-blue.png:
+blue.png: Makefile
 	magick -size 1x1 canvas:#0000a0 blue.png
 
-darkgray.png:
+darkgray.png: Makefile
 	magick -size 1x1 canvas:#a8a8a8 darkgray.png
 
-black.png:
+black.png: Makefile
 	magick -size 1x1 canvas:#000000 black.png
 
-darkorange.png:
+darkorange.png: Makefile
 	magick -size 1x1 canvas:${ORANGE_DARK} darkorange.png
 
-midorange.png:
+midorange.png: Makefile
 	magick -size 1x1 canvas:${ORANGE_MID} midorange.png
 
-lightorange.png:
+lightorange.png: Makefile
 	magick -size 1x1 canvas:${ORANGE_MID} lightorange.png
 
-darkorangebox.png:
+darkorangebox.png: Makefile
 	magick -size ${BOXTARGET}x${BOXTARGET} \
 		-define gradient:radii=${THREEQUARTERBOX},${QUARTERBOX} \
 		-define gradient:angle=135 \
@@ -72,8 +81,7 @@ darkorangebox.png:
 		\( +clone -threshold 9 -draw "rectangle 0,0 ${DARKORANGE_Y},${DARKORANGE_Y}" \) -channel-fx '|gray=>alpha' \
 		darkorangebox.png
 
-# we currently do this very kludgey thing because IM wants you to stack masks and I just
-lightorangebox.png:
+lightorangebox.png: Makefile
 	magick -size ${BOXTARGET}x${BOXTARGET} \
 		canvas:${ORANGE_MID} \
 		\( \
@@ -96,7 +104,7 @@ lightorangebox.png:
 		-compose copy-opacity -composite \
 		lightorangebox.png
 
-yelgrnbox.png:
+yelgrnbox.png: Makefile
 	magick -size ${BOXTARGET}x${BOXTARGET} \
 		-define gradient:direction=East \
 		gradient:${YELLOW}-${GREEN} \
@@ -121,7 +129,7 @@ yelgrnbox.png:
 		-compose copy-opacity -composite \
 		yelgrnbox.png
 
-bluebox.png:
+bluebox.png: Makefile
 	magick -size ${BOXTARGET}x${BOXTARGET} \
 		-define gradient:direction=North \
 		gradient:${DARKBLUE}-${LIGHTBLUE} \
