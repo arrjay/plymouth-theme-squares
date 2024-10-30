@@ -381,6 +381,21 @@ bluebox.sprite.SetOpacity(0);
 bluebox.sprite.SetImage(Image("blue.png").Scale(bluebox.sizeX, bluebox.sizeY));
 bluebox.sprite.SetPosition(bluebox.posX, bluebox.posY, statbars_z - 40);
 
+# record some information fox text games in alternate screens
+fontfill.source = Image.Text("▓", 0, 0, 0, 1, "Anonymous Pro 40");
+fontfill.cols = 80;
+fontfill.targetWidth = (bluebox.sizeX / fontfill.cols);
+fontfill.ratio = fontfill.targetWidth / fontfill.source.GetWidth();
+fontfill.charSizeX = Math.Int(fontfill.source.GetWidth() * fontfill.ratio);
+fontfill.charSizeY = Math.Int(fontfill.source.GetHeight() * fontfill.ratio);
+fontfill.startX = bluebox.posX;
+fontfill.startY = bluebox.posY;
+fontfill.midCols = fontfill.cols / 2;
+fontfill.midX = bluebox.posX + (fontfill.charSizeX * fontfill.midCols);
+fontfill.lines = Math.Int(bluebox.sizeY / fontfill.charSizeY);
+fontfill.midLines = Math.Int(fontfill.lines / 2);
+fontfill.midY = bluebox.posY + (fontfill.charSizeY * fontfill.midLines);
+
 fun alt_reveal (id, opacity) {
   alts[id].sprite.SetOpacity(opacity);
   alts[id].version_sprite.SetOpacity(opacity);
@@ -418,19 +433,56 @@ fun display_normal_callback () {
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 
 fun dialog_setup() {
+  global.fontfill;
+  global.bluebox;
   local.box;
   local.lock;
   local.entry;
- 
-  box.image = Image("box.png");
-  lock.image = Image("lock.png");
+  local.fn;
+  local.a8;
+
+  a8 = 160 / 255;
+
+  fn = "Anonymous Pro 40";
+  box.charCount = 28;
+  box.lineCount = 7;
+  box.sizeX = fontfill.charSizeX * box.charCount;
+  box.image1 = Image.Text("╔══════════════════════════╗", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  box.image2 = Image.Text("║   SYSTEM BOOT SECURITY   ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  box.image3 = Image.Text("╟──────────────────────────╢", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  box.imageR = Image.Text("║                          ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  box.imageE = Image.Text("╚══════════════════════════╝", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  lock.image1 = Image.Text("╭-╮", a8, a8, a8, 1, "Anonymous Pro 40").Scale(fontfill.charSizeX * 3, fontfill.charSizeY);
+  lock.image2 = Image.Text("▐°▌", a8, a8, a8, 1, "Anonymous Pro 40").Scale(fontfill.charSizeX * 3, fontfill.charSizeY);
+  lock.image3 = Image.Text("▝▔▘", a8, a8, a8, 1, "Anonymous Pro 40").Scale(fontfill.charSizeX * 3, fontfill.charSizeY);
   entry.image = Image("entry.png");
  
-  box.sprite = Sprite(box.image);
-  box.x = Window.GetWidth()  / 2 - box.image.GetWidth ()/2;
-  box.y = Window.GetHeight() / 4 - box.image.GetHeight()/4;
+  # render the password entry box
+  box.sprite1 = Sprite(box.image1);
+  box.sprite2 = Sprite(box.image2);
+  box.sprite3 = Sprite(box.image3);
+  box.sprite4 = Sprite(box.imageR);
+  box.sprite5 = Sprite(box.imageR);
+  box.sprite6 = Sprite(box.imageR);
+  box.sprite7 = Sprite(box.imageE);
+  # we're actually kind fudging the horizontal alignment?
+  printf(fontfill.midCols);
+  box.startX = screen_center.x - (Math.Int(box.charCount / 2) * fontfill.charSizeX);
+  box.startY = fontfill.midY - (Math.Int(box.lineCount / 2) * fontfill.charSizeY);
+  box.y2 = box.startY + fontfill.charSizeY;
+  box.y3 = box.startY + (fontfill.charSizeY * 2);
+  box.y4 = box.startY + (fontfill.charSizeY * 3);
+  box.y5 = box.startY + (fontfill.charSizeY * 4);
+  box.y6 = box.startY + (fontfill.charSizeY * 5);
+  box.y7 = box.startY + (fontfill.charSizeY * 6);
   box.z = 10000;
-  box.sprite.SetPosition(box.x, box.y, box.z);
+  box.sprite1.SetPosition(box.startX, box.startY, box.z);
+  box.sprite2.SetPosition(box.startX, box.y2, box.z);
+  box.sprite3.SetPosition(box.startX, box.y3, box.z);
+  box.sprite4.SetPosition(box.startX, box.y4, box.z);
+  box.sprite5.SetPosition(box.startX, box.y5, box.z);
+  box.sprite6.SetPosition(box.startX, box.y6, box.z);
+  box.sprite7.SetPosition(box.startX, box.y7, box.z);
     
   # scale the lock with the box height
   lock.scale_factor = box.image.GetHeight() / lock.image.GetHeight() * 0.75;
@@ -465,7 +517,13 @@ fun dialog_opacity(opacity) {
   }
   alt_reveal(style, opacity);
 
-  dialog.box.sprite.SetOpacity (opacity);
+  dialog.box.sprite1.SetOpacity (opacity);
+  dialog.box.sprite2.SetOpacity (opacity);
+  dialog.box.sprite3.SetOpacity (opacity);
+  dialog.box.sprite4.SetOpacity (opacity);
+  dialog.box.sprite5.SetOpacity (opacity);
+  dialog.box.sprite6.SetOpacity (opacity);
+  dialog.box.sprite7.SetOpacity (opacity);
   dialog.lock.sprite.SetOpacity (opacity);
   dialog.entry.sprite.SetOpacity (opacity);
   for (index = 0; dialog.bullet[index]; index++) {
