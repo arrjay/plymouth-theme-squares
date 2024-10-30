@@ -418,9 +418,6 @@ fun display_normal_callback () {
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 
 fun dialog_setup() {
-  image_reveal(style, 0);
-  spinline_Move(spinline.alt);
-  alt_reveal(style, 1);
 
   local.box;
   local.lock;
@@ -461,6 +458,14 @@ fun dialog_setup() {
 }
     
 fun dialog_opacity(opacity) {
+  image_reveal(style, 1 - opacity);
+  if (opacity > 0) {
+    spinline_Move(spinline.alt);
+  } else {
+    spinline_Move(spinline.center);
+  }
+  alt_reveal(style, opacity);
+
   dialog.box.sprite.SetOpacity (opacity);
   dialog.lock.sprite.SetOpacity (opacity);
   dialog.entry.sprite.SetOpacity (opacity);
