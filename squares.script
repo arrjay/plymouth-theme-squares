@@ -436,7 +436,6 @@ fun dialog_setup() {
   global.fontfill;
   global.bluebox;
   local.box;
-  local.lock;
   local.entry;
   local.fn;
   local.a8;
@@ -444,18 +443,16 @@ fun dialog_setup() {
   a8 = 160 / 255;
 
   fn = "Anonymous Pro 40";
-  box.charCount = 28;
-  box.lineCount = 7;
+  box.charCount = 32;
+  box.lineCount = 10;
   box.sizeX = fontfill.charSizeX * box.charCount;
-  box.image1 = Image.Text("╔══════════════════════════╗", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
-  box.image2 = Image.Text("║   SYSTEM BOOT SECURITY   ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
-  box.image3 = Image.Text("╟──────────────────────────╢", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
-  box.imageR = Image.Text("║                          ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
-  box.imageE = Image.Text("╚══════════════════════════╝", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
-  lock.image1 = Image.Text("╭-╮  Enter Password", a8, a8, a8, 1, "Anonymous Pro 40").Scale(fontfill.charSizeX * 20, fontfill.charSizeY);
-  lock.image2 = Image.Text("▐°▌", a8, a8, a8, 1, "Anonymous Pro 40").Scale(fontfill.charSizeX * 3, fontfill.charSizeY);
-  lock.image3 = Image.Text("▝▔▘", a8, a8, a8, 1, "Anonymous Pro 40").Scale(fontfill.charSizeX * 3, fontfill.charSizeY);
-  entry.image = Image.Text("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", a8, a8, a8, 1, "Anonymous Pro 40").Scale(fontfill.charSizeX * 20, fontfill.charSizeY);
+  box.image1 = Image.Text("╔══════════════════════════════╗", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  box.image2 = Image.Text("║     SYSTEM BOOT SECURITY     ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  box.image3 = Image.Text("╟──███─────────────────────────╢", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  box.image4 = Image.Text("║ █   █  Enter Password:       ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  box.image5 = Image.Text("║███████                       ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  box.image6 = Image.Text("╚███████═══════════════════════╝", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  entry.image = Image.Text("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", 1, 1, 1, 1, "Anonymous Pro 40").Scale(fontfill.charSizeX * 21, fontfill.charSizeY);
  
   # render the password entry box
   box.sprite1 = Sprite(box.image1);
@@ -464,7 +461,6 @@ fun dialog_setup() {
   box.sprite4 = Sprite(box.imageR);
   box.sprite5 = Sprite(box.imageR);
   box.sprite6 = Sprite(box.imageR);
-  box.sprite7 = Sprite(box.imageE);
   # we're actually kind fudging the horizontal alignment?
   box.startX = screen_center.x - (Math.Int(box.charCount / 2) * fontfill.charSizeX);
   box.startY = fontfill.midY - (Math.Int(box.lineCount / 2) * fontfill.charSizeY);
@@ -473,7 +469,6 @@ fun dialog_setup() {
   box.y4 = box.startY + (fontfill.charSizeY * 3);
   box.y5 = box.startY + (fontfill.charSizeY * 4);
   box.y6 = box.startY + (fontfill.charSizeY * 5);
-  box.y7 = box.startY + (fontfill.charSizeY * 6);
   box.z = 10000;
   box.sprite1.SetPosition(box.startX, box.startY, box.z);
   box.sprite2.SetPosition(box.startX, box.y2, box.z);
@@ -481,30 +476,14 @@ fun dialog_setup() {
   box.sprite4.SetPosition(box.startX, box.y4, box.z);
   box.sprite5.SetPosition(box.startX, box.y5, box.z);
   box.sprite6.SetPosition(box.startX, box.y6, box.z);
-  box.sprite7.SetPosition(box.startX, box.y7, box.z);
-    
-  # scale the lock with the box height
-  lock.sprite1 = Sprite(lock.image1);
-  lock.sprite2 = Sprite(lock.image2);
-  lock.sprite3 = Sprite(lock.image3);
-  
-  lock.startX = box.startX + (fontfill.charSizeX * 2);
-  lock.startY = box.startY + (fontfill.charSizeY * 3);
-  lock.y2 = box.startY + (fontfill.charSizeY * 4);
-  lock.y3 = box.startY + (fontfill.charSizeY * 5);
-  lock.z = box.z + 1;
-  lock.sprite1.SetPosition(lock.startX, lock.startY, lock.z);
-  lock.sprite2.SetPosition(lock.startX, lock.y2, lock.z);
-  lock.sprite3.SetPosition(lock.startX, lock.y3, lock.z);
-    
+
   entry.sprite = Sprite(entry.image);
-  entry.x = box.startX + (fontfill.charSizeX * 6);
-  entry.y = box.startY + (fontfill.charSizeY * 4);
+  entry.x = box.startX + (fontfill.charSizeX * 9);
+  entry.y = box.startY + (fontfill.charSizeY * 5);
   entry.z = box.z + 1;
   entry.sprite.SetPosition(entry.x, entry.y, entry.z);
     
   global.dialog.box = box;
-  global.dialog.lock = lock;
   global.dialog.entry = entry;
   global.dialog.bullet_image = Image("bullet.png");
   dialog_opacity (1);
@@ -525,10 +504,7 @@ fun dialog_opacity(opacity) {
   dialog.box.sprite4.SetOpacity (opacity);
   dialog.box.sprite5.SetOpacity (opacity);
   dialog.box.sprite6.SetOpacity (opacity);
-  dialog.box.sprite7.SetOpacity (opacity);
-  dialog.lock.sprite1.SetOpacity (opacity);
-  dialog.lock.sprite2.SetOpacity (opacity);
-  dialog.lock.sprite3.SetOpacity (opacity);
+
   dialog.entry.sprite.SetOpacity (opacity);
   for (index = 0; dialog.bullet[index]; index++) {
     dialog.bullet[index].sprite.SetOpacity(opacity);
