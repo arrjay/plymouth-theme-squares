@@ -360,12 +360,35 @@ fun image_altsprite(id, squareEdge, origSquareX, origSquareY) {
                                       altimage_z);
 }
 
+# draw a black box, then a blue box inside it for *messages*
+# this part's gonna be anachronistic.
+blackbox.sizeX = W - 2;
+# you're gonna have to read between the lines
+blackbox.sizeY = spinline.center - spinline.alt - spinline.scale;
+blackbox.posX = 1;
+blackbox.posY = spinline.alt + 1;
+blackbox.sprite = Sprite();
+blackbox.sprite.SetOpacity(0);
+blackbox.sprite.SetImage(Image("black.png").Scale(blackbox.sizeX, blackbox.sizeY));
+blackbox.sprite.SetPosition(blackbox.posX, blackbox.posY, statbars_z - 50);
+
+bluebox.sizeX = blackbox.sizeX - 8;
+bluebox.sizeY = blackbox.sizeY - 8;
+bluebox.posX = blackbox.posX + 4;
+bluebox.posY = blackbox.posY + 4;
+bluebox.sprite = Sprite();
+bluebox.sprite.SetOpacity(0);
+bluebox.sprite.SetImage(Image("blue.png").Scale(bluebox.sizeX, bluebox.sizeY));
+bluebox.sprite.SetPosition(bluebox.posX, bluebox.posY, statbars_z - 40);
+
 fun alt_reveal (id, opacity) {
   alts[id].sprite.SetOpacity(opacity);
   alts[id].version_sprite.SetOpacity(opacity);
   alts[id].distro_sprite.SetOpacity(opacity);
   alts[id].edition_sprite.SetOpacity(opacity);
   alts[id].boxsprite.SetOpacity(opacity);
+  blackbox.sprite.SetOpacity(opacity);
+  bluebox.sprite.SetOpacity(opacity);
 }
 
 image_altsprite("pro", 55, 5, 5);
