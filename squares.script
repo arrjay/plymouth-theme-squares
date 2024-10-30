@@ -446,21 +446,23 @@ fun dialog_setup() {
   box.charCount = 32;
   box.lineCount = 10;
   box.sizeX = fontfill.charSizeX * box.charCount;
+  box.oversizeY = Math.Int(fontfill.charSizeY * 1.05);
+  box.shiftoversize = Math.Int((fontfill.charSizeY / 2) - (box.oversizeY / 2));
   box.image1 = Image.Text("╔══════════════════════════════╗", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
   box.image2 = Image.Text("║     SYSTEM BOOT SECURITY     ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
-  box.image3 = Image.Text("╟──███─────────────────────────╢", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
-  box.image4 = Image.Text("║ █   █  Enter Password:       ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
-  box.image5 = Image.Text("║███████                       ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
-  box.image6 = Image.Text("╚███████═══════════════════════╝", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY);
+  box.image3 = Image.Text("╟──███─────────────────────────╢", a8, a8, a8, 1, fn).Scale(box.sizeX, box.oversizeY);
+  box.image4 = Image.Text("║ █   █  Enter Password:       ║", a8, a8, a8, 1, fn).Scale(box.sizeX, box.oversizeY);
+  box.image5 = Image.Text("║███████                       ║", a8, a8, a8, 1, fn).Scale(box.sizeX, box.oversizeY);
+  box.image6 = Image.Text("╚███████═══════════════════════╝", a8, a8, a8, 1, fn).Scale(box.sizeX, box.oversizeY);
   entry.image = Image.Text("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", 1, 1, 1, 1, "Anonymous Pro 40").Scale(fontfill.charSizeX * 21, fontfill.charSizeY);
  
   # render the password entry box
   box.sprite1 = Sprite(box.image1);
   box.sprite2 = Sprite(box.image2);
   box.sprite3 = Sprite(box.image3);
-  box.sprite4 = Sprite(box.imageR);
-  box.sprite5 = Sprite(box.imageR);
-  box.sprite6 = Sprite(box.imageR);
+  box.sprite4 = Sprite(box.image4);
+  box.sprite5 = Sprite(box.image5);
+  box.sprite6 = Sprite(box.image6);
   # we're actually kind fudging the horizontal alignment?
   box.startX = screen_center.x - (Math.Int(box.charCount / 2) * fontfill.charSizeX);
   box.startY = fontfill.midY - (Math.Int(box.lineCount / 2) * fontfill.charSizeY);
@@ -472,14 +474,14 @@ fun dialog_setup() {
   box.z = 10000;
   box.sprite1.SetPosition(box.startX, box.startY, box.z);
   box.sprite2.SetPosition(box.startX, box.y2, box.z);
-  box.sprite3.SetPosition(box.startX, box.y3, box.z);
-  box.sprite4.SetPosition(box.startX, box.y4, box.z);
-  box.sprite5.SetPosition(box.startX, box.y5, box.z);
-  box.sprite6.SetPosition(box.startX, box.y6, box.z);
+  box.sprite3.SetPosition(box.startX, box.y3 - box.shiftoversize, box.z);
+  box.sprite4.SetPosition(box.startX, box.y4 - box.shiftoversize, box.z);
+  box.sprite5.SetPosition(box.startX, box.y5 - box.shiftoversize, box.z);
+  box.sprite6.SetPosition(box.startX, box.y6 - box.shiftoversize, box.z);
 
   entry.sprite = Sprite(entry.image);
   entry.x = box.startX + (fontfill.charSizeX * 9);
-  entry.y = box.startY + (fontfill.charSizeY * 5);
+  entry.y = box.startY + (fontfill.charSizeY * 4);
   entry.z = box.z + 1;
   entry.sprite.SetPosition(entry.x, entry.y, entry.z);
     
