@@ -6,6 +6,7 @@ fun printf (output) {
 
 # used for drawing alternate mode up (or, you know, not)
 status = "normal";
+plymouthMode = Plymouth.GetMode();
 
 # distro info block
 distro.name = "Fedora";
@@ -123,7 +124,14 @@ fun message (text) {
 
 # we should do something smarter, to hide the *previous* text, but...sounds hard.
 fun starting (text) {
-  message("Starting up...");
+  global.plymouthMode;
+  if (plymouthMode == "boot") {
+    message("Starting up...");
+  }
+  # we *should* enter a different shutdown screen but that's not here yet. at least be less confusing.
+  if (plymouthMode == "shutdown") {
+    message("Shutting down...");
+  }
 }
 
 # we handle messages by replacing the startup text.
@@ -218,7 +226,7 @@ fun image_sprite (id, origScaleX, origScaleY, origMidX, origMidY, squareEdge, or
   version.sizeY = Math.Int(image[id].version_source.GetHeight() / text_target_size * text_scale_target * 0.5);
   # !!! below is reused for aligning the *next row* (edition) of text too !!!
   version.sizeX = Math.Int(text_scale_target);
-  version.scaled = version.text.Scale(version.sizeX, version.sizeY);
+  version.scaled = image[id].version_source.Scale(version.sizeX, version.sizeY);
   image[id].version_sprite = Sprite();
   image[id].version_sprite.SetOpacity(0);
   image[id].version_sprite.SetImage(version.scaled);
@@ -420,6 +428,7 @@ Plymouth.SetBootProgressFunction(progress_callback);
 
 # we call on the dialog we haven't made yet (to turn it off) for normal callbacks.
 fun display_normal_callback () {
+  global.plymouthMode = Plymouth.GetMode();
   global.status = "normal";
   if (global.dialog) {
     dialog_opacity (0);
@@ -428,8 +437,8 @@ fun display_normal_callback () {
   alt_reveal(style, 0);
   spinline_Move(spinline.center);
   image_reveal(style, 1);
-
 }
+
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 
 fun dialog_setup() {
