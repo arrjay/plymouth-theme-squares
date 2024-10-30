@@ -459,7 +459,7 @@ fun dialog_setup() {
   box.image4 = Image.Text("║ █   █  Enter Password:       ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY * box.scaleBigBlocksY);
   box.image5 = Image.Text("║███████                       ║", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY * box.scaleBigBlocksY);
   box.image6 = Image.Text("╚███████═══════════════════════╝", a8, a8, a8, 1, fn).Scale(box.sizeX, fontfill.charSizeY * box.scaleBigBlocksY);
-  entry.image = Image.Text("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", 1, 1, 1, 1, "Anonymous Pro 40").Scale(fontfill.charSizeX * 20, fontfill.charSizeY * box.scaleBigBlocksY);
+  entry.image = Image.Text("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", 1, 1, 1, 1, fn).Scale(fontfill.charSizeX * 20, fontfill.charSizeY * box.scaleBigBlocksY);
  
   # render the password entry box
   box.sprite1 = Sprite(box.image1);
@@ -492,7 +492,7 @@ fun dialog_setup() {
     
   global.dialog.box = box;
   global.dialog.entry = entry;
-  global.dialog.bullet_image = Image("bullet.png");
+  global.dialog.bullet_image = Image.Text("•", 1, 0.5, 0.5, 1, fn).Scale(fontfill.charSizeX, fontfill.charSizeY);
   dialog_opacity (1);
 }
     
