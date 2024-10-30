@@ -112,8 +112,8 @@ fun message (text) {
 
   source = Image.Text(text, 0, 0, 0, 1, "Libre Franklin Light 40");
   # proportinally scale the font to the height of bottom_step
-  scalef = source.GetHeight() / bottom_step;
-  scaled = source.Scale(source.GetWidth() * scalef, bottom_step);
+  scalef = (bottom_step * 1.1) / source.GetHeight();
+  scaled = source.Scale(source.GetWidth() * scalef, (bottom_step * 1.1));
   message_sprite.SetOpacity(0);
   message_sprite.SetImage(scaled);
   # position below the progress bar so it doesn't look really off. (it's really off.)
@@ -418,7 +418,6 @@ fun display_normal_callback () {
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 
 fun dialog_setup() {
-
   local.box;
   local.lock;
   local.entry;
